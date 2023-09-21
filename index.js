@@ -77,6 +77,16 @@ function handleDrop(e) {
         cropImage(img);
       };
       document.getElementById('thumbnails').appendChild(cropBtn);
+
+      // Open editor modal and display image
+      const canvas = document.getElementById('editorCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+      };
+      openModal();
     };
   });
 
@@ -135,6 +145,34 @@ document.getElementById('rotateCounterClockwise').addEventListener('click', func
   const canvas = document.getElementById('editorCanvas');
   rotateCanvas(canvas, -90);
 });
+
+function cropImage(canvas, cropX, cropY, cropWidth, cropHeight) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.width = cropWidth;
+  canvas.height = cropHeight;
+  ctx.putImageData(imageData, 0, 0);
+}
+
+// Event handler for the Crop button
+document.getElementById('crop').addEventListener('click', function() {
+  // Logic to display cropping UI goes here
+  // ...
+});
+
+// Event handlers for OK and Cancel buttons
+document.getElementById('cropOk').addEventListener('click', function() {
+  // Logic to apply cropping goes here
+  // ...
+});
+
+document.getElementById('cropCancel').addEventListener('click', function() {
+  // Logic to cancel cropping goes here
+  // ...
+});
+
+
 
 
 
