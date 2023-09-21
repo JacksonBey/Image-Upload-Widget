@@ -65,8 +65,47 @@
           img.src = reader.result;
           img.width = 100;
           document.getElementById('thumbnails').appendChild(img);
+
+
+          // Add rotation button for each image
+          let rotateBtn = document.createElement('button');
+          rotateBtn.innerHTML = 'Rotate';
+          rotateBtn.onclick = function() {
+            rotateImage(img);
+          };
+          document.getElementById('thumbnails').appendChild(rotateBtn);
+
+          // Add cropping button for each image (For demonstration)
+          let cropBtn = document.createElement('button');
+          cropBtn.innerHTML = 'Crop';
+          cropBtn.onclick = function() {
+            cropImage(img);
+          };
+          document.getElementById('thumbnails').appendChild(cropBtn);
         };
       });
+
+    }
+
+    // Rotate image function
+    function rotateImage(imgElement) {
+      let canvas = document.createElement('canvas');
+      let ctx = canvas.getContext('2d');
+      canvas.width = imgElement.width;
+      canvas.height = imgElement.height;
+      ctx.rotate((90 * Math.PI) / 180);
+      ctx.drawImage(imgElement, 0, -imgElement.height);
+      imgElement.src = canvas.toDataURL();
+    }
+
+    // Crop image function (basic demonstration)
+    function cropImage(imgElement) {
+      let canvas = document.createElement('canvas');
+      let ctx = canvas.getContext('2d');
+      canvas.width = imgElement.width / 2;
+      canvas.height = imgElement.height / 2;
+      ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      imgElement.src = canvas.toDataURL();
     }
 
   </script>
