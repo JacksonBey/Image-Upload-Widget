@@ -5,48 +5,59 @@
   <script type="text/javascript">
     // Initialize the Image Upload Widget
     function initImageUploadWidget() {
-      const dropZone = document.getElementById("dropZone");
+      console.log("Image Upload Widget Initialized");
 
-      dropZone.addEventListener("dragenter", handleDragEnter, false);
-      dropZone.addEventListener("dragleave", handleDragLeave, false);
-      dropZone.addEventListener("dragover", handleDragOver, false);
-      dropZone.addEventListener("drop", handleDrop, false);
+      // Register drag-and-drop event listeners
+      const dropArea = document.getElementById('dropArea');
+      dropArea.addEventListener('dragenter', handleDragEnter, false);
+      dropArea.addEventListener('dragleave', handleDragLeave, false);
+      dropArea.addEventListener('dragover', handleDragOver, false);
+      dropArea.addEventListener('drop', handleDrop, false);
     }
 
+    // Dummy function for API call to upload files, easily replaceable
+    function ajaxFileUpload(endpoint, formData) {
+      console.log("File uploaded to", endpoint);
+    }
+
+    // Drag and Drop event handlers
     function handleDragEnter(e) {
-      console.log("handleDragEnter e:", e);
-      console.log("e.currentTarget:", e.currentTarget);
       e.preventDefault();
-      e.currentTarget.classList.add("dragging");
+      console.log("Drag Enter");
     }
 
     function handleDragLeave(e) {
-      console.log("handleDragLeave e:", e);
-      console.log("e.currentTarget:", e.currentTarget);
       e.preventDefault();
-      e.currentTarget.classList.remove("dragging");
+      console.log("Drag Leave");
     }
 
     function handleDragOver(e) {
-      console.log("handleDragOver e:", e);
-      console.log("e.currentTarget:", e.currentTarget);
       e.preventDefault();
+      console.log("Drag Over");
     }
 
     function handleDrop(e) {
-      console.log("handleDragDrop e:", e);
-      console.log("e.currentTarget:", e.currentTarget);
       e.preventDefault();
-      e.currentTarget.classList.remove("dragging");
-      
-      // Further logic to process files
-      // const files = e.dataTransfer.files;
+      console.log("Drop");
+      // File handling logic here
     }
+
   </script>
+  <style>
+    /* Add basic styling for the drop area */
+    #dropArea {
+      width: 300px;
+      height: 200px;
+      border: 2px dashed #ccc;
+      text-align: center;
+      margin: 20px;
+    }
+  </style>
 </head>
 <body onload="initImageUploadWidget()">
 
   <h1>Image Upload Widget</h1>
+  <div id="dropArea">Drag and Drop Files Here</div>
 
 </body>
 </html>
