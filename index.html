@@ -39,7 +39,29 @@
     function handleDrop(e) {
       e.preventDefault();
       console.log("Drop");
-      // File handling logic here
+      console.log('Data transfer:', e.dataTransfer.files);
+
+
+      // File handling logic
+      let files = e.dataTransfer.files;
+      Array.from(files).forEach(file => {
+        // Validation based on file type
+        let fileType = file.type.split('/')[1];
+        if (!['jpeg', 'jpg', 'png', 'gif', 'heic'].includes(fileType.toLowerCase())) {
+          console.error('Unsupported file type');
+          return;
+        }
+
+        // File Preview as Thumbnail
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function() {
+          let img = document.createElement('img');
+          img.src = reader.result;
+          img.width = 100;
+          document.getElementById('thumbnails').appendChild(img);
+        };
+      });
     }
 
   </script>
@@ -58,6 +80,7 @@
 
   <h1>Image Upload Widget</h1>
   <div id="dropArea">Drag and Drop Files Here</div>
+  <div id="thumbnails"></div>
 
 </body>
 </html>
