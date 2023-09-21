@@ -36,6 +36,8 @@
       console.log("Drag Over");
     }
 
+    let filesToUpload = [];
+
     function handleDrop(e) {
       e.preventDefault();
       console.log("Drop");
@@ -51,6 +53,9 @@
           console.error('Unsupported file type');
           return;
         }
+
+        // Add to global array for later upload
+        filesToUpload.push(file);
 
         // File Preview as Thumbnail
         let reader = new FileReader();
