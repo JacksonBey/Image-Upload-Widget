@@ -112,3 +112,29 @@ function openModal() {
 function closeModal() {
   document.getElementById('editorModal').style.display = "none";
 }
+
+// JavaScript function to rotate the image on the canvas
+function rotateCanvas(canvas, angle) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((angle * Math.PI) / 180);
+  ctx.drawImage(imageData, -imageData.width / 2, -imageData.height / 2);
+  ctx.restore();
+}
+
+// Event handlers for the rotation buttons
+document.getElementById('rotateClockwise').addEventListener('click', function() {
+  const canvas = document.getElementById('editorCanvas');
+  rotateCanvas(canvas, 90);
+});
+
+document.getElementById('rotateCounterClockwise').addEventListener('click', function() {
+  const canvas = document.getElementById('editorCanvas');
+  rotateCanvas(canvas, -90);
+});
+
+
+
