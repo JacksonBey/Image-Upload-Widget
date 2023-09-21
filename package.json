@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/JacksonBey/Image-Upload-Widget#readme",
   "devDependencies": {
-    "jest": "^29.7.0"
+    "fs": "^0.0.1-security",
+    "jest": "^29.7.0",
+    "jsdom": "^22.1.0"
+  },
+  "dependencies": {
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
