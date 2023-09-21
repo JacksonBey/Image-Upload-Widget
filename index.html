@@ -14,6 +14,15 @@
   <h1>Image Upload Widget</h1>
   <div id="dropArea">Drag and Drop Files Here</div>
   <div id="thumbnails"></div>
-
+  
+  <!-- Editor Modal -->
+  <div id="editorModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal()">&times;</span>
+      <canvas id="editorCanvas"></canvas>
+      <!-- Rotation and Crop buttons will go here -->
+    </div>
+    <!-- Thumbnails will go here -->
+  </div>
 </body>
 </html>

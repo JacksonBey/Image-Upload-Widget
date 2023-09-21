@@ -102,3 +102,13 @@ function cropImage(imgElement) {
   ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
   imgElement.src = canvas.toDataURL();
 }
+
+
+// MODAL LOGIC
+function openModal() {
+  document.getElementById('editorModal').style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById('editorModal').style.display = "none";
+}
