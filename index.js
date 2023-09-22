@@ -60,7 +60,9 @@ function handleDrop(e) {
       img.src = reader.result;
       img.width = 100;
       document.getElementById('thumbnails').appendChild(img);
-
+      img.addEventListener('click', function() {
+        openModal();
+      });
 
       // Add rotation button for each image
       let rotateBtn = document.createElement('button');
@@ -103,15 +105,15 @@ function rotateImage(imgElement) {
   imgElement.src = canvas.toDataURL();
 }
 
-// Crop image function (basic demonstration)
-function cropImage(imgElement) {
-  let canvas = document.createElement('canvas');
-  let ctx = canvas.getContext('2d');
-  canvas.width = imgElement.width / 2;
-  canvas.height = imgElement.height / 2;
-  ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-  imgElement.src = canvas.toDataURL();
-}
+// // Crop image function (basic demonstration)
+// function cropImage(imgElement) {
+//   let canvas = document.createElement('canvas');
+//   let ctx = canvas.getContext('2d');
+//   canvas.width = imgElement.width / 2;
+//   canvas.height = imgElement.height / 2;
+//   ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+//   imgElement.src = canvas.toDataURL();
+// }
 
 
 // MODAL LOGIC
@@ -155,21 +157,54 @@ function cropImage(canvas, cropX, cropY, cropWidth, cropHeight) {
   ctx.putImageData(imageData, 0, 0);
 }
 
-// Event handler for the Crop button
+let cropping = false;
+let cropStartX, cropStartY, cropEndX, cropEndY;
+
+// Initialize cropping when the Crop button is clicked
 document.getElementById('crop').addEventListener('click', function() {
-  // Logic to display cropping UI goes here
-  // ...
+  cropping = true;
+  // Show OK and Cancel buttons
+  document.getElementById('cropOk').style.display = 'inline';
+  document.getElementById('cropCancel').style.display = 'inline';
 });
 
-// Event handlers for OK and Cancel buttons
-document.getElementById('cropOk').addEventListener('click', function() {
-  // Logic to apply cropping goes here
-  // ...
-});
-
+// Cancel cropping
 document.getElementById('cropCancel').addEventListener('click', function() {
-  // Logic to cancel cropping goes here
-  // ...
+  cropping = false;
+  // Hide OK and Cancel buttons
+  document.getElementById('cropOk').style.display = 'none';
+  document.getElementById('cropCancel').style.display = 'none';
+});
+
+// Apply cropping
+document.getElementById('cropOk').addEventListener('click', function() {
+  const canvas = document.getElementById('editorCanvas');
+  cropImage(canvas, cropStartX, cropStartY, cropEndX - cropStartX, cropEndY - cropStartY);
+  cropping = false;
+  // Hide OK and Cancel buttons
+  document.getElementById('cropOk').style.display = 'none';
+  document.getElementById('cropCancel').style.display = 'none';
+});
+
+// Handle mouse events for cropping on canvas
+const canvas = document.getElementById('editorCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.addEventListener('mousedown', function(e) {
+  if (!cropping) return;
+  cropStartX = e.clientX - canvas.getBoundingClientRect().left;
+  cropStartY = e.clientY - canvas.getBoundingClientRect().top;
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  if (!cropping) return;
+  cropEndX = e.clientX - canvas.getBoundingClientRect().left;
+  cropEndY = e.clientY - canvas.getBoundingClientRect().top;
+  // Redraw image and cropping area
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Assuming the image is already loaded into a variable named 'img'
+  ctx.drawImage(img, 0, 0, img.width, img.height);
+  ctx.strokeRect(cropStartX, cropStartY, cropEndX - cropStartX, cropEndY - cropStartY);
 });
 
 

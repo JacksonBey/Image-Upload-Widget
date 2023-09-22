@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image uploader</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body onload="initImageUploadWidget()">
+
+  <h1>Image Upload Widget</h1>
+  <div id="dropArea">Drag and Drop Files Here</div>
+  <div id="thumbnails"></div>
+  <div class="box-2">
+    <div class="result">
+
+    </div>
+  </div>
+  <div class="box-2 img-result hide">
+    <img src="" alt="" class="cropped">
+  </div>
+  <div class="box">
+    <div class="options hide">
+      <label for="width"></label>
+      <input type="number" class="img-w" value="300" min="100" max="1200" />
+
+    </div>
+    <button class="btn save hide">
+      Save
+    </button>
+    <a class="btn download hide" href="javascript:void(0);" download="imagename.png">Download</a>
+  </div>
+  
+</body>
+<style>
+  .page{
+    margin: 1em auto;
+    max-width: 768px;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    height: 100%;
+
+  }
+  .box{
+    padding: .5em;
+    width: 100%;
+    margin: .5em;
+
+  }
+  .box-2{
+    padding: .5em;
+    width: calc(100%/ 2 - 1em);
+  }
+  .options label, .options input{
+    width: 4em;
+    padding: .5em 1em; 
+  }
+
+  .btn{
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    padding: .5em 1em;
+    text-decoration: none;
+    margin: 0.8em .3em;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .hide{
+    display: none;
+  }
+  .img{
+    max-width: 100%;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="index.js"></script>
+
+</html>
