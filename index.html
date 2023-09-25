@@ -68,9 +68,14 @@
     const canvas = document.getElementById('canvas');
     const buttonContainer = document.querySelector('.button-container');
 
+    cropBtn.addEventListener('click', cropAndSave);
+    saveBtn.addEventListener('click', saveImage);
+    cancelBtn.addEventListener('click', cancelImage);
+
 
 
     function start(imageElement, index) {
+      console.log("Starting to process image", imageElement, index); // Debug line
       currentUnsavedIndex = index; // store the index
       // const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
@@ -90,49 +95,52 @@
       // const saveBtn = document.getElementById('save');
       buttonContainer.style.display = 'block';
 
-      cropBtn.addEventListener('click', function () {
-        buttonContainer.style.display = 'none';
+      // cropBtn.addEventListener('click', function () {
+      //   buttonContainer.style.display = 'none';
 
-        if (cropper) {
-          const canvas = cropper.getCroppedCanvas({
-            width: 160,
-            height: 160,
-          });
-          canvas.toBlob(function (blob) {
-            if (thumbnailToReplace) {
-              thumbnailToReplace.src = canvas.toDataURL();
-              thumbnailToReplace = null;
-            } else {
-              const thumbnail = document.createElement('img');
-              thumbnail.src = canvas.toDataURL();
-              thumbnail.width = 100;
-              thumbnail.addEventListener('click', function () {
-                thumbnailToReplace = this;
-                const img = new Image();
-                img.src = this.src;
-                img.onload = function () {
-                  start(img);
-                };
-              });
-              document.getElementById('thumbnails').appendChild(thumbnail);
-            }
-            cropper.destroy();
-            buttonContainer.style.display = 'none';
-            canvas.style.display = 'none';
-            // Remove from unsaved if exists
-            const index = unsavedThumbnails.indexOf(canvas.toDataURL());
-            if (index > -1) {
-              unsavedThumbnails.splice(index, 1);
-              renderUnsavedThumbnails();
-            }
-          });
-        }
-      });
+      //   if (cropper) {
+      //     const canvas = cropper.getCroppedCanvas({
+      //       width: 160,
+      //       height: 160,
+      //     });
+      //     canvas.toBlob(function (blob) {
+      //       if (thumbnailToReplace) {
+      //         thumbnailToReplace.src = canvas.toDataURL();
+      //         thumbnailToReplace = null;
+      //       } else {
+      //         const thumbnail = document.createElement('img');
+      //         thumbnail.src = canvas.toDataURL();
+      //         thumbnail.width = 100;
+      //         thumbnail.addEventListener('click', function () {
+      //           thumbnailToReplace = this;
+      //           const img = new Image();
+      //           img.src = this.src;
+      //           img.onload = function () {
+      //             start(img);
+      //           };
+      //         });
+      //         document.getElementById('thumbnails').appendChild(thumbnail);
+      //       }
+      //       cropper.destroy();
+      //       buttonContainer.style.display = 'none';
+      //       canvas.style.display = 'none';
+      //       // Remove from unsaved if exists
+      //       const index = unsavedThumbnails.indexOf(canvas.toDataURL());
+      //       if (index > -1) {
+      //         unsavedThumbnails.splice(index, 1);
+      //         renderUnsavedThumbnails();
+      //       }
+      //     });
+      //   }
+      // });
 
+      function createThumbnail(src) {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = src;
+        thumbnail.width = 100;
+        return thumbnail;
+      }
 
-      cropBtn.addEventListener('click', cropAndSave);
-      saveBtn.addEventListener('click', saveImage);
-      cancelBtn.addEventListener('click', cancelImage);
 
       document.getElementById('rotateClockwise').addEventListener('click', function () {
         cropper.rotate(90);
@@ -168,11 +176,11 @@
         });
         croppedCanvas.toBlob(function (blob) {
           if (thumbnailToReplace) {
-            thumbnailToReplace.src = canvas.toDataURL();
+            thumbnailToReplace.src = croppedCanvas.toDataURL();
             thumbnailToReplace = null;
           } else {
             const thumbnail = document.createElement('img');
-            thumbnail.src = canvas.toDataURL();
+            thumbnail.src = croppedCanvas.toDataURL();
             thumbnail.width = 100;
             thumbnail.addEventListener('click', function () {
               thumbnailToReplace = this;
@@ -209,7 +217,7 @@
         const croppedCanvas = cropper.getCroppedCanvas();
         croppedCanvas.toBlob(function (blob) {
           const thumbnail = document.createElement('img');
-          thumbnail.src = canvas.toDataURL();
+          thumbnail.src = croppedCanvas.toDataURL();
           thumbnail.width = 100;
           document.getElementById('thumbnails').appendChild(thumbnail);
 
@@ -243,48 +251,42 @@
           const img = new Image();
           img.src = e.target.result;
           img.onload = function () {
-            unsavedThumbnails.push(img.src);
+            img.uniqueSrc = `${img.src}?timestamp=${new Date().getTime()}`; // Add uniqueSrc as a property to the image object
+            unsavedThumbnails.push(img); // Store the actual image object
             renderUnsavedThumbnails();
           };
         };
         reader.readAsDataURL(file);
       });
-      renderUnsavedThumbnails();
     });
 
-    // Function to render unsaved thumbnails
     function renderUnsavedThumbnails() {
       const unsavedArea = document.getElementById('unsaved-thumbnails');
       unsavedArea.innerHTML = '';
-      unsavedThumbnails.forEach((src, index) => {
-        const thumbnail = document.createElement('img');
-        thumbnail.src = src;
+      unsavedThumbnails.forEach((img, index) => {
+        const thumbnail = img.cloneNode(); // Clone the actual image object
         thumbnail.width = 100;
         thumbnail.style.border = '2px solid red'; // Red border for unsaved
         thumbnail.addEventListener('click', function () {
-          const img = new Image();
-          img.src = this.src;
-          img.onload = function () {
-            start(img, index);
-          };
+          start(img, index); // Pass the actual image object
         });
         unsavedArea.appendChild(thumbnail);
       });
     }
 
+
     window.addEventListener('DOMContentLoaded', function () {
       const imageInput = document.getElementById('image');
-
       imageInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
-
         if (file && file.type.startsWith('image/')) {
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = new Image();
             img.src = e.target.result;
             img.onload = function () {
-              start(img);
+              unsavedThumbnails.push(img.src);
+              renderUnsavedThumbnails(); // Moved here
             };
           };
           reader.readAsDataURL(file);
@@ -292,19 +294,7 @@
           console.log('No image file selected or wrong file type.');
         }
       });
-
-      // const saveBtn = document.getElementById('save');
-      // saveBtn.addEventListener('click', function () {
-      //   // Logic for saving the image can go here
-      // });
     });
-
-
-
-
-    cropBtn.addEventListener('click', cropAndSave);
-    saveBtn.addEventListener('click', saveImage);
-    cancelBtn.addEventListener('click', cancelImage);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
     integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg=="
