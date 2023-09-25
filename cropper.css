@@ -306,3 +306,12 @@
 /* .cropper-container {
   visibility: hidden;
 } */
+
+/* Add basic styling for the drop area */
+#image {
+  width: 300px;
+  height: 200px;
+  border: 2px dashed #ccc;
+  text-align: center;
+  margin: 20px;
+}
