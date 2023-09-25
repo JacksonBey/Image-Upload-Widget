@@ -27,6 +27,8 @@
     <div>
       <h3>Saved Thumbnails</h3>
       <div id="thumbnails"></div>
+      <h3>Unsaved Thumbnails</h3>
+      <div id="unsaved-thumbnails"></div>
     </div>
     <div class="img-container">
       <!-- <img id="image" src="../images/picture.jpg" alt="Picture"> -->
@@ -44,10 +46,6 @@
       <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
       <button id="save">Save</button>
     </div>
-    <div>
-      <h3>Unsaved Thumbnails</h3>
-      <div id="unsaved-thumbnails"></div>
-    </div>
   </div>
 
   <!-- <script src="../js/cropper.js"></script> -->
@@ -60,22 +58,12 @@
     let thumbnailToReplace = null;
     let cropper = null;
     let unsavedThumbnails = [];
-    let currentUnsavedIndex = null;
 
-    const cropBtn = document.getElementById('crop');
-    const saveBtn = document.getElementById('save');
-    const cancelBtn = document.getElementById('cancel');
-    const canvas = document.getElementById('canvas');
-    const buttonContainer = document.querySelector('.button-container');
-
-
-
-    function start(imageElement, index) {
-      currentUnsavedIndex = index; // store the index
-      // const canvas = document.getElementById('canvas');
+    function start(imageElement) {
+      const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
-      // const buttonContainer = document.querySelector('.button-container');
-      // const currentCanvas = document.getElementById('canvas');
+      const buttonContainer = document.querySelector('.button-container');
+      const currentCanvas = document.getElementById('canvas');
 
       canvas.style.display = 'block';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -86,8 +74,7 @@
       }
       cropper = new Cropper(canvas);
 
-      // const cropBtn = document.getElementById('crop');
-      // const saveBtn = document.getElementById('save');
+      const cropBtn = document.getElementById('crop');
       buttonContainer.style.display = 'block';
 
       cropBtn.addEventListener('click', function () {
@@ -118,7 +105,7 @@
             }
             cropper.destroy();
             buttonContainer.style.display = 'none';
-            canvas.style.display = 'none';
+            currentCanvas.style.display = 'none';
             // Remove from unsaved if exists
             const index = unsavedThumbnails.indexOf(canvas.toDataURL());
             if (index > -1) {
@@ -129,11 +116,6 @@
         }
       });
 
-
-      cropBtn.addEventListener('click', cropAndSave);
-      saveBtn.addEventListener('click', saveImage);
-      cancelBtn.addEventListener('click', cancelImage);
-
       document.getElementById('rotateClockwise').addEventListener('click', function () {
         cropper.rotate(90);
       });
@@ -142,91 +124,13 @@
         cropper.rotate(-90);
       });
 
-
-    }
-
-    // const cancelBtn = document.getElementById('cancel');
-    function cancelImage() {
-      if (cropper) {
-        cropper.destroy();
-      }
-      buttonContainer.style.display = 'none';
-      canvas.style.display = 'none';
-    }
-
-    function cropAndSave() {
-      // const buttonContainer = document.querySelector('.button-container');
-      // const currentCanvas = document.getElementById('canvas');
-
-      // Remove any existing event listener before adding a new one
-      cropBtn.removeEventListener('click', cropAndSave);
-      cropBtn.addEventListener('click', cropAndSave);
-      if (cropper) {
-        const croppedCanvas = cropper.getCroppedCanvas({
-          width: 160,
-          height: 160,
-        });
-        croppedCanvas.toBlob(function (blob) {
-          if (thumbnailToReplace) {
-            thumbnailToReplace.src = canvas.toDataURL();
-            thumbnailToReplace = null;
-          } else {
-            const thumbnail = document.createElement('img');
-            thumbnail.src = canvas.toDataURL();
-            thumbnail.width = 100;
-            thumbnail.addEventListener('click', function () {
-              thumbnailToReplace = this;
-              const img = new Image();
-              img.src = this.src;
-              img.onload = function () {
-                start(img);
-              };
-            });
-            document.getElementById('thumbnails').appendChild(thumbnail);
-          }
-        });
-
-        // Remove from unsaved if exists
-        if (currentUnsavedIndex !== null) {
-          unsavedThumbnails.splice(currentUnsavedIndex, 1);
-          renderUnsavedThumbnails();
-        }
-        currentUnsavedIndex = null;
-
+      const cancelBtn = document.getElementById('cancel');
+      cancelBtn.addEventListener('click', function () {
         cropper.destroy();
         buttonContainer.style.display = 'none';
         canvas.style.display = 'none';
-      }
+      });
     }
-
-
-    // Updated Save button logic
-    function saveImage() {
-      // Remove any existing event listener before adding a new one
-      saveBtn.removeEventListener('click', saveImage);
-      saveBtn.addEventListener('click', saveImage);
-      if (cropper) {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        croppedCanvas.toBlob(function (blob) {
-          const thumbnail = document.createElement('img');
-          thumbnail.src = canvas.toDataURL();
-          thumbnail.width = 100;
-          document.getElementById('thumbnails').appendChild(thumbnail);
-
-          // Remove from unsaved if exists
-          if (currentUnsavedIndex !== null) {
-            unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            renderUnsavedThumbnails();
-          }
-          currentUnsavedIndex = null;
-        });
-
-        cropper.destroy();
-        buttonContainer.style.display = 'none';
-        canvas.style.display = 'none';
-      }
-    }
-
 
     const canvasContainer = document.querySelector('.img-container');
     canvasContainer.addEventListener('dragover', function (e) {
@@ -249,14 +153,13 @@
         };
         reader.readAsDataURL(file);
       });
-      renderUnsavedThumbnails();
     });
 
     // Function to render unsaved thumbnails
     function renderUnsavedThumbnails() {
       const unsavedArea = document.getElementById('unsaved-thumbnails');
       unsavedArea.innerHTML = '';
-      unsavedThumbnails.forEach((src, index) => {
+      unsavedThumbnails.forEach(src => {
         const thumbnail = document.createElement('img');
         thumbnail.src = src;
         thumbnail.width = 100;
@@ -265,7 +168,7 @@
           const img = new Image();
           img.src = this.src;
           img.onload = function () {
-            start(img, index);
+            start(img);
           };
         });
         unsavedArea.appendChild(thumbnail);
@@ -293,18 +196,11 @@
         }
       });
 
-      // const saveBtn = document.getElementById('save');
-      // saveBtn.addEventListener('click', function () {
-      //   // Logic for saving the image can go here
-      // });
+      const saveBtn = document.getElementById('save');
+      saveBtn.addEventListener('click', function () {
+        // Logic for saving the image can go here
+      });
     });
-
-
-
-
-    cropBtn.addEventListener('click', cropAndSave);
-    saveBtn.addEventListener('click', saveImage);
-    cancelBtn.addEventListener('click', cancelImage);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
     integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg=="
