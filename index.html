@@ -27,6 +27,7 @@
     <div>
       <h3>Saved Thumbnails</h3>
       <div id="thumbnails"></div>
+      <button id="download">Download</button>
     </div>
     <div class="img-container">
       <!-- <img id="image" src="../images/picture.jpg" alt="Picture"> -->
@@ -57,9 +58,35 @@
   <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script>
+    // constraints
+    let max_width = 800;  // Set to 0 to ignore
+    let max_height = 600; // Set to 0 to ignore
+    let min_width = 100;  // Set to 0 to ignore
+    let min_height = 100; // Set to 0 to ignore
+    let max_photos = 10;  // Maximum number of photos allowed
+
+    function validateImage(imageElement) {
+      const width = imageElement.width;
+      const height = imageElement.height;
+
+      // Max Width and Height
+      if ((max_width > 0 && width > max_width) || (max_height > 0 && height > max_height)) {
+        return { isValid: false, error: "Image dimensions exceed maximum limits" };
+      }
+
+      // Min Width and Height
+      if ((min_width > 0 && width < min_width) || (min_height > 0 && height < min_height)) {
+        return { isValid: false, error: "Image dimensions are below minimum limits" };
+      }
+
+      return { isValid: true };
+    }
+
     let thumbnailToReplace = null;
     let cropper = null;
     let unsavedThumbnails = [];
+    let savedImages = [];
+    let savedFullImages = [];
     let currentUnsavedIndex = null;
 
     const cropBtn = document.getElementById('crop');
@@ -71,17 +98,17 @@
     cropBtn.addEventListener('click', cropAndSave);
     saveBtn.addEventListener('click', saveImage);
     cancelBtn.addEventListener('click', cancelImage);
-
-
-
+    document.getElementById('download').addEventListener('click', function () {
+      // Implement your download logic here
+    });
+    document.getElementById('save').addEventListener('click', function () {
+      saveImage(); // Assuming saveImage is refactored accordingly
+    });
     function start(imageElement, index) {
-      console.log("Starting to process image", imageElement, index); // Debug line
+      // console.log("Starting to process image", imageElement, index); // Debug line
+      console.log("Start Function: Called with index ", index);
       currentUnsavedIndex = index; // store the index
-      // const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
-      // const buttonContainer = document.querySelector('.button-container');
-      // const currentCanvas = document.getElementById('canvas');
-
       canvas.style.display = 'block';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
@@ -90,49 +117,7 @@
         cropper.destroy();
       }
       cropper = new Cropper(canvas);
-
-      // const cropBtn = document.getElementById('crop');
-      // const saveBtn = document.getElementById('save');
       buttonContainer.style.display = 'block';
-
-      // cropBtn.addEventListener('click', function () {
-      //   buttonContainer.style.display = 'none';
-
-      //   if (cropper) {
-      //     const canvas = cropper.getCroppedCanvas({
-      //       width: 160,
-      //       height: 160,
-      //     });
-      //     canvas.toBlob(function (blob) {
-      //       if (thumbnailToReplace) {
-      //         thumbnailToReplace.src = canvas.toDataURL();
-      //         thumbnailToReplace = null;
-      //       } else {
-      //         const thumbnail = document.createElement('img');
-      //         thumbnail.src = canvas.toDataURL();
-      //         thumbnail.width = 100;
-      //         thumbnail.addEventListener('click', function () {
-      //           thumbnailToReplace = this;
-      //           const img = new Image();
-      //           img.src = this.src;
-      //           img.onload = function () {
-      //             start(img);
-      //           };
-      //         });
-      //         document.getElementById('thumbnails').appendChild(thumbnail);
-      //       }
-      //       cropper.destroy();
-      //       buttonContainer.style.display = 'none';
-      //       canvas.style.display = 'none';
-      //       // Remove from unsaved if exists
-      //       const index = unsavedThumbnails.indexOf(canvas.toDataURL());
-      //       if (index > -1) {
-      //         unsavedThumbnails.splice(index, 1);
-      //         renderUnsavedThumbnails();
-      //       }
-      //     });
-      //   }
-      // });
 
       function createThumbnail(src) {
         const thumbnail = document.createElement('img');
@@ -149,8 +134,6 @@
       document.getElementById('rotateCounterClockwise').addEventListener('click', function () {
         cropper.rotate(-90);
       });
-
-
     }
 
     // const cancelBtn = document.getElementById('cancel');
@@ -163,9 +146,25 @@
     }
 
     function cropAndSave() {
-      // const buttonContainer = document.querySelector('.button-container');
-      // const currentCanvas = document.getElementById('canvas');
+      console.log("cropAndSave: Called");  // Debug Log
 
+      // Check for cropper initialization
+      if (!cropper) {
+        console.log("Error: Cropper not initialized.");
+        return;
+      }
+
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 160,
+        height: 160,
+      });
+
+      // Log and check croppedCanvas
+      console.log("Cropped Canvas: ", croppedCanvas);
+      if (!croppedCanvas) {
+        console.log("Error: Cropped canvas is null. Make sure crop box is set.");
+        return;
+      }
       // Remove any existing event listener before adding a new one
       cropBtn.removeEventListener('click', cropAndSave);
       cropBtn.addEventListener('click', cropAndSave);
@@ -174,24 +173,40 @@
           width: 160,
           height: 160,
         });
+        // if (thumbnailToReplace) {
+        //   thumbnailToReplace.src = croppedCanvas.toDataURL();
+        //   thumbnailToReplace = null;
+        // } else {
+        //   const thumbnail = document.createElement('img');
+        //   thumbnail.src = croppedCanvas.toDataURL();
+        //   thumbnail.width = 100;
+        //   thumbnail.addEventListener('click', function () {
         croppedCanvas.toBlob(function (blob) {
-          if (thumbnailToReplace) {
-            thumbnailToReplace.src = croppedCanvas.toDataURL();
-            thumbnailToReplace = null;
-          } else {
-            const thumbnail = document.createElement('img');
-            thumbnail.src = croppedCanvas.toDataURL();
-            thumbnail.width = 100;
-            thumbnail.addEventListener('click', function () {
-              thumbnailToReplace = this;
-              const img = new Image();
-              img.src = this.src;
-              img.onload = function () {
-                start(img);
-              };
-            });
-            document.getElementById('thumbnails').appendChild(thumbnail);
-          }
+          const thumbnail = document.createElement('img');
+          thumbnail.src = croppedCanvas.toDataURL();
+          thumbnail.width = 100;
+
+          // Change 1: Assign index as data attribute
+          thumbnail.dataset.index = savedImages.length;
+
+          thumbnail.addEventListener('click', function () {
+            // Change 2: Retrieve index from data attribute
+            const index = parseInt(this.dataset.index);
+
+            console.log("Thumbnail: Click event fired");  // Debug Log
+            // const index = savedImages.indexOf(blob);
+            console.log("Index of clicked thumbnail: ", index); // Debug Log
+            console.log("Corresponding Full Image Source: ", savedFullImages[index]); // Debug Log
+            const fullQualityImageSrc = savedFullImages[index];
+            const img = new Image();
+            img.src = fullQualityImageSrc;
+            img.onload = function () {
+              start(img);
+            };
+          });
+          savedImages.push(blob);
+          document.getElementById('thumbnails').appendChild(thumbnail);
+          // }
         });
 
         // Remove from unsaved if exists
@@ -210,29 +225,46 @@
 
     // Updated Save button logic
     function saveImage() {
-      // Remove any existing event listener before adding a new one
-      saveBtn.removeEventListener('click', saveImage);
-      saveBtn.addEventListener('click', saveImage);
-      if (cropper) {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        croppedCanvas.toBlob(function (blob) {
-          const thumbnail = document.createElement('img');
-          thumbnail.src = croppedCanvas.toDataURL();
-          thumbnail.width = 100;
-          document.getElementById('thumbnails').appendChild(thumbnail);
-
-          // Remove from unsaved if exists
-          if (currentUnsavedIndex !== null) {
-            unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            renderUnsavedThumbnails();
-          }
-          currentUnsavedIndex = null;
-        });
-
-        cropper.destroy();
-        buttonContainer.style.display = 'none';
-        canvas.style.display = 'none';
+      // Check for cropper initialization
+      if (!cropper) {
+        console.log("Error: Cropper not initialized.");
+        return;
       }
+
+      const croppedCanvas = cropper.getCroppedCanvas();
+
+      // Check if croppedCanvas is null
+      if (!croppedCanvas) {
+        console.log("Error: croppedCanvas is null");
+        return;
+      }
+
+      croppedCanvas.toBlob(function (blob) {
+        savedImages.push(blob);
+        savedFullImages.push(croppedCanvas.toDataURL());
+        if (!croppedCanvas) {
+          console.log("Error: croppedCanvas is null");
+          return;
+        }
+        // savedImages.push(blob);  // Thumbnail blob
+
+        // savedFullImages.push(cropper.getCroppedCanvas().toDataURL());  // Full-quality image
+        const thumbnail = document.createElement('img');
+        thumbnail.src = croppedCanvas.toDataURL();
+        thumbnail.width = 100;
+        document.getElementById('thumbnails').appendChild(thumbnail);
+
+        // Remove from unsaved if exists
+        if (currentUnsavedIndex !== null) {
+          unsavedThumbnails.splice(currentUnsavedIndex, 1);
+          renderUnsavedThumbnails();
+        }
+        currentUnsavedIndex = null;
+      });
+
+      cropper.destroy();
+      buttonContainer.style.display = 'none';
+      canvas.style.display = 'none';
     }
 
 
@@ -251,9 +283,19 @@
           const img = new Image();
           img.src = e.target.result;
           img.onload = function () {
-            img.uniqueSrc = `${img.src}?timestamp=${new Date().getTime()}`; // Add uniqueSrc as a property to the image object
-            unsavedThumbnails.push(img); // Store the actual image object
+            // img.uniqueSrc = `${img.src}?timestamp=${new Date().getTime()}`; // Add uniqueSrc as a property to the image object
+            // unsavedThumbnails.push(img); // Store the actual image object
+            // renderUnsavedThumbnails();
+            const validation = validateImage(img);
+            if (!validation.isValid) {
+              alert(validation.error);
+              document.getElementById('image').value = '';
+              return;
+            }
+            unsavedThumbnails.push(img);
             renderUnsavedThumbnails();
+            console.log('Image Loaded: Trying to auto-populate canvas'); // Debug Log
+            start(img, unsavedThumbnails.length - 1);  // Auto-populate canvas
           };
         };
         reader.readAsDataURL(file);
@@ -263,16 +305,20 @@
     function renderUnsavedThumbnails() {
       const unsavedArea = document.getElementById('unsaved-thumbnails');
       unsavedArea.innerHTML = '';
-      unsavedThumbnails.forEach((img, index) => {
-        const thumbnail = img.cloneNode(); // Clone the actual image object
+      unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
+        const thumbnail = new Image();
+        thumbnail.src = img.src;
         thumbnail.width = 100;
         thumbnail.style.border = '2px solid red'; // Red border for unsaved
         thumbnail.addEventListener('click', function () {
-          start(img, index); // Pass the actual image object
+          const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
+          // console.log('originalImage', originalImage)
+          start(originalImage, index); // Pass the actual original image object
         });
         unsavedArea.appendChild(thumbnail);
       });
     }
+
 
 
     window.addEventListener('DOMContentLoaded', function () {
@@ -280,21 +326,53 @@
       imageInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function () {
-              unsavedThumbnails.push(img.src);
-              renderUnsavedThumbnails(); // Moved here
-            };
-          };
-          reader.readAsDataURL(file);
+          // const reader = new FileReader();
+          // reader.onload = function (e) {
+          //   const img = new Image();
+          //   img.src = e.target.result;
+          //   img.onload = function () {
+          //     unsavedThumbnails.push(img.src);
+          //     renderUnsavedThumbnails(); // Moved here
+          //   };
+          // };
+          // reader.readAsDataURL(file);
+          console.log('events', event)
+          onImageUpload(event); // Call the function directly
         } else {
           console.log('No image file selected or wrong file type.');
         }
       });
     });
+
+    function onImageUpload(event) {
+      console.log('ON IMAGE UPLOAD: Triggered'); // Debug Log
+      // console.log('ON IMAGE UPLOAD: ', event)
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function () {
+          const validation = validateImage(img);
+          if (!validation.isValid) {
+            alert(validation.error);
+            document.getElementById('image').value = '';
+            return;
+          }
+          unsavedThumbnails.push(img);
+          renderUnsavedThumbnails();
+          console.log('Image Loaded: Trying to auto-populate canvas'); // Debug Log
+          start(img, unsavedThumbnails.length - 1);  // Auto-populate canvas
+        };
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // Hook up the validation to your input change event
+    const imageInput = document.getElementById('image');
+    imageInput.addEventListener('change', onImageUpload);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
     integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg=="
