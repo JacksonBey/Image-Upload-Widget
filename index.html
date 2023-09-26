@@ -43,7 +43,7 @@
       <button type="button" class="btn btn-primary" id="crop">Crop</button>
       <button id="rotateClockwise">Rotate Clockwise</button>
       <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
-      <button id="save">Save</button>
+      <button id="save">Save without crop</button>
     </div>
     <div>
       <h3>Unsaved Thumbnails</h3>
@@ -90,13 +90,13 @@
     let currentUnsavedIndex = null;
 
     const cropBtn = document.getElementById('crop');
-    const saveBtn = document.getElementById('save');
+    // const saveBtn = document.getElementById('save');
     const cancelBtn = document.getElementById('cancel');
     const canvas = document.getElementById('canvas');
     const buttonContainer = document.querySelector('.button-container');
 
     cropBtn.addEventListener('click', cropAndSave);
-    saveBtn.addEventListener('click', saveImage);
+    // saveBtn.addEventListener('click', saveImage);
     cancelBtn.addEventListener('click', cancelImage);
     document.getElementById('download').addEventListener('click', function () {
       // Implement your download logic here
@@ -116,7 +116,9 @@
       if (cropper) {
         cropper.destroy();
       }
-      cropper = new Cropper(canvas);
+      cropper = new Cropper(canvas, {
+        autoCropArea: 1 // Sets crop box to 100% of the image area
+      });
       buttonContainer.style.display = 'block';
 
       function createThumbnail(src) {
@@ -153,26 +155,21 @@
         console.log("Error: Cropper not initialized.");
         return;
       }
-
-      const croppedCanvas = cropper.getCroppedCanvas({
-        width: 160,
-        height: 160,
-      });
-
       // Log and check croppedCanvas
-      console.log("Cropped Canvas: ", croppedCanvas);
-      if (!croppedCanvas) {
-        console.log("Error: Cropped canvas is null. Make sure crop box is set.");
-        return;
-      }
+      // console.log("Cropped Canvas: ", croppedCanvas);
+
       // Remove any existing event listener before adding a new one
-      cropBtn.removeEventListener('click', cropAndSave);
-      cropBtn.addEventListener('click', cropAndSave);
+      // cropBtn.removeEventListener('click', cropAndSave);
+      // cropBtn.addEventListener('click', cropAndSave);
       if (cropper) {
         const croppedCanvas = cropper.getCroppedCanvas({
           width: 160,
           height: 160,
         });
+        if (!croppedCanvas) {
+        console.log("Error: Cropped canvas is null. Make sure crop box is set.");
+        return;
+      }
         // if (thumbnailToReplace) {
         //   thumbnailToReplace.src = croppedCanvas.toDataURL();
         //   thumbnailToReplace = null;
@@ -187,15 +184,13 @@
           thumbnail.width = 100;
 
           // Change 1: Assign index as data attribute
-          thumbnail.dataset.index = savedImages.length;
+          const index = savedImages.length;
 
           thumbnail.addEventListener('click', function () {
             // Change 2: Retrieve index from data attribute
-            const index = parseInt(this.dataset.index);
 
             console.log("Thumbnail: Click event fired");  // Debug Log
-            // const index = savedImages.indexOf(blob);
-            console.log("Index of clicked thumbnail: ", index); // Debug Log
+            // console.log("Index of clicked thumbnail: ", index); // Debug Log
             console.log("Corresponding Full Image Source: ", savedFullImages[index]); // Debug Log
             const fullQualityImageSrc = savedFullImages[index];
             const img = new Image();
@@ -205,9 +200,10 @@
             };
           });
           savedImages.push(blob);
+          savedFullImages.push(croppedCanvas.toDataURL());
           document.getElementById('thumbnails').appendChild(thumbnail);
           // }
-        });
+        }, 'image/jpeg', 1);
 
         // Remove from unsaved if exists
         if (currentUnsavedIndex !== null) {
@@ -223,44 +219,47 @@
     }
 
 
-    // Updated Save button logic
     function saveImage() {
-      // Check for cropper initialization
       if (!cropper) {
-        console.log("Error: Cropper not initialized.");
+        console.error("Error: Cropper not initialized.");
         return;
       }
 
       const croppedCanvas = cropper.getCroppedCanvas();
 
-      // Check if croppedCanvas is null
       if (!croppedCanvas) {
-        console.log("Error: croppedCanvas is null");
+        console.error("Error: croppedCanvas is null");
         return;
       }
 
       croppedCanvas.toBlob(function (blob) {
-        savedImages.push(blob);
-        savedFullImages.push(croppedCanvas.toDataURL());
-        if (!croppedCanvas) {
-          console.log("Error: croppedCanvas is null");
-          return;
-        }
-        // savedImages.push(blob);  // Thumbnail blob
-
-        // savedFullImages.push(cropper.getCroppedCanvas().toDataURL());  // Full-quality image
         const thumbnail = document.createElement('img');
         thumbnail.src = croppedCanvas.toDataURL();
         thumbnail.width = 100;
+
+        // Attach index as a data attribute to the thumbnail
+        thumbnail.dataset.index = savedImages.length;
+
+        thumbnail.addEventListener('click', function () {
+          const index = parseInt(this.dataset.index);  // Retrieve index from data attribute
+          const fullQualityImageSrc = savedFullImages[index];
+          const img = new Image();
+          img.src = fullQualityImageSrc;
+          img.onload = function () {
+            start(img);
+          };
+        });
+
+        savedImages.push(blob);
+        savedFullImages.push(croppedCanvas.toDataURL());
         document.getElementById('thumbnails').appendChild(thumbnail);
 
-        // Remove from unsaved if exists
         if (currentUnsavedIndex !== null) {
           unsavedThumbnails.splice(currentUnsavedIndex, 1);
           renderUnsavedThumbnails();
         }
         currentUnsavedIndex = null;
-      });
+      }, 'image/jpeg', 1);
 
       cropper.destroy();
       buttonContainer.style.display = 'none';
