@@ -33,6 +33,19 @@ let currentUnsavedIndex = null;
 let hasSavedImages = false;
 let hasUnsavedThumbnails = false;
 
+// const cropBtn = document.getElementById('crop');
+// const cancelBtn = document.getElementById('cancel');
+// const canvas = document.getElementById('canvas');
+// const buttonContainer = document.querySelector('.button-container');
+
+// cropBtn.addEventListener('click', cropAndSave);
+// cancelBtn.addEventListener('click', cancelImage);
+// document.getElementById('download').addEventListener('click', function () {
+//   // Implement your download logic here
+// });
+// document.getElementById('save').addEventListener('click', function () {
+//   saveImage(); // Assuming saveImage is refactored accordingly
+// });
 
 // DOM Elements
 const cropBtn = document.getElementById('crop');
@@ -40,14 +53,16 @@ const cancelBtn = document.getElementById('cancel');
 const canvas = document.getElementById('canvas');
 const buttonContainer = document.querySelector('.button-container');
 const canvasContainer = document.querySelector('.img-container');
-const saveBtn = document.getElementById('save');
 
 function initializeEventListeners() {
+  let cropBtn = document.getElementById('crop');
+  let cancelBtn = document.getElementById('cancel');
+  let canvas = document.getElementById('canvas');
+  let buttonContainer = document.querySelector('.button-container');
+  let canvasContainer = document.querySelector('.img-container');
+
   cropBtn.addEventListener('click', cropAndSave);
   cancelBtn.addEventListener('click', cancelImage);
-  saveBtn.addEventListener('click', function () {
-    saveImage(); // Assuming saveImage is refactored accordingly
-  });
 
   canvasContainer.addEventListener('dragover', e => e.preventDefault());
   canvasContainer.addEventListener('drop', onDrop);
@@ -73,14 +88,6 @@ function start(imageElement, index) {
     autoCropArea: 1 // Sets crop box to 100% of the image area
   });
   buttonContainer.style.display = 'block';
-
-  function createThumbnail(src) {
-    const thumbnail = document.createElement('img');
-    thumbnail.src = src;
-    thumbnail.width = 100;
-    return thumbnail;
-  }
-
 
   document.getElementById('rotateClockwise').addEventListener('click', function () {
     cropper.rotate(90);
