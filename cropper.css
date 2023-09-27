@@ -315,3 +315,12 @@
   text-align: center;
   margin: 20px;
 }
+
+.container {
+  margin: 20px auto;
+  max-width: 640px;
+}
+
+img {
+  max-width: 100%;
+}
