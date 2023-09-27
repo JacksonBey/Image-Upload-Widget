@@ -4,6 +4,15 @@ let max_height = 600; // Set to 0 to ignore
 let min_width = 100;  // Set to 0 to ignore
 let min_height = 100; // Set to 0 to ignore
 let max_photos = 10;  // Maximum number of photos allowed
+let filePath = null;
+
+// constraints
+// let max_width = <?php echo $max_width; ?>;
+// let max_height = <?php echo $max_height; ?>;
+// let min_width = <?php echo $min_width; ?>;
+// let min_height = <?php echo $min_height; ?>;
+// let max_photos = <?php echo $max_photos; ?>;
+// let file_path = '<?php echo $file_path; ?>';
 
 function validateImage(imageElement) {
   const width = imageElement.width;
@@ -41,6 +50,7 @@ const canvas = document.getElementById('canvas');
 const buttonContainer = document.querySelector('.button-container');
 const canvasContainer = document.querySelector('.img-container');
 const saveBtn = document.getElementById('save');
+const downloadBtn = document.getElementById('download');
 
 function initializeEventListeners() {
   cropBtn.addEventListener('click', cropAndSave);
@@ -48,6 +58,10 @@ function initializeEventListeners() {
   saveBtn.addEventListener('click', function () {
     saveImage(); // Assuming saveImage is refactored accordingly
   });
+  downloadBtn.addEventListener('click', function () {
+    downloadImages();
+  });
+  
 
   canvasContainer.addEventListener('dragover', e => e.preventDefault());
   canvasContainer.addEventListener('drop', onDrop);
@@ -73,14 +87,6 @@ function start(imageElement, index) {
     autoCropArea: 1 // Sets crop box to 100% of the image area
   });
   buttonContainer.style.display = 'block';
-
-  function createThumbnail(src) {
-    const thumbnail = document.createElement('img');
-    thumbnail.src = src;
-    thumbnail.width = 100;
-    return thumbnail;
-  }
-
 
   document.getElementById('rotateClockwise').addEventListener('click', function () {
     cropper.rotate(90);
@@ -250,20 +256,6 @@ function renderUnsavedThumbnails() {
   toggleVisibility();
 }
 
-
-
-// window.addEventListener('DOMContentLoaded', function () {
-//   const imageInput = document.getElementById('image');
-//   imageInput.addEventListener('change', function (event) {
-//     const file = event.target.files[0];
-//     if (file && file.type.startsWith('image/')) {
-//       onImageUpload(event); // Call the function directly
-//     } else {
-//       console.log('No image file selected or wrong file type.');
-//     }
-//   });
-// });
-
 function onImageUpload(event) {
   const files = event.target.files;
   const filesArray = Array.from(files);
@@ -293,12 +285,6 @@ function onImageUpload(event) {
   });
 }
 
-
-
-// Hook up the validation to your input change event
-const imageInput = document.getElementById('image');
-// imageInput.addEventListener('change', onImageUpload);
-
 function toggleSaveImageText() {
   const imagesText = document.getElementById('images-text');
   const downloadBtn = document.getElementById('download');
@@ -327,6 +313,17 @@ function toggleVisibility() {
     hasUnsavedThumbnails = newHasUnsavedThumbnails;
   }
 }
+
+function downloadImages() {
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', 'download_images.php', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({
+    images: savedImages.map(img => img.toDataURL('image/jpeg')),
+    path: filePath
+  }));
+}
+
 
 // Main Execution
 function main() {
