@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Image Cropper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Image Cropper</h1>
+    <h3 id="images-text" class="hidden">Images</h3>
+    <div>
+      <h3 id="saved-thumbnails-text" class="hidden">Saved</h3>
+      <div id="thumbnails"></div>
+      <button id="download" class="hidden">Download</button>
+    </div>
+    <div class="img-container">
+      <input type="file" name="" id="image" required accept="image/*" multiple>
+    </div>
+    <div class="img-container">
+      <canvas id="canvas" class="hidden"></canvas>
+    </div>
+    <div class="button-container hidden">
+      <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="crop">Crop</button>
+      <button id="rotateClockwise">Rotate Clockwise</button>
+      <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
+      <button id="save">Save without crop</button>
+    </div>
+    <div>
+      <h3 id="unsaved-thumbnails-text" class="hidden">Unsaved</h3>
+      <div id="unsaved-thumbnails"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
