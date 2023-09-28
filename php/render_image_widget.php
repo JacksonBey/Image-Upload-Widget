@@ -189,6 +189,7 @@ function render_image_widget($config)
                 }
                 buttonContainer.style.display = 'none';
                 canvas.style.display = 'none';
+                imageInput.value = '';
             }
 
             function cropAndSave() {
@@ -460,10 +461,25 @@ function render_image_widget($config)
             // }
 
             function deleteImage() {
-                if (currentUnsavedIndex !== null && currentUnsavedIndex !== undefined) {
-                    // Remove from unsaved thumbnails
-                    unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                    renderUnsavedThumbnails();
+                if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
+                    // Remove from saved thumbnails and images
+                    const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
+                    if (thumbnailElement) {
+                        thumbnailElement.remove();
+                        savedImages.splice(currentSavedIndex, 1);
+                        savedFullImages.splice(currentSavedIndex, 1);
+
+                        // Re-index remaining thumbnails
+                        const remainingThumbnails = container.querySelectorAll('#thumbnails > img');
+                        remainingThumbnails.forEach((thumbnail, index) => {
+                            thumbnail.dataset.index = index;
+                        });
+
+                        setTimeout(() => {
+                            toggleSaveImageText();
+                        }, 100); // waits 100 milliseconds
+                        toggleVisibility();
+                    }
                 } else if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
                     // Remove from saved thumbnails and images
                     const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
@@ -485,6 +501,7 @@ function render_image_widget($config)
                 canvas.style.display = 'none';
                 currentUnsavedIndex = null;
                 currentSavedIndex = null;
+                imageInput.value = '';
             }
 
 
