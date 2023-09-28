@@ -223,7 +223,10 @@ function render_image_widget($config)
                             };
                         });
                         savedImages.push(blob);
-                        toggleSaveImageText();
+                        setTimeout(() => {
+                            toggleSaveImageText();
+                        }, 100); // waits 100 milliseconds
+                        // toggleSaveImageText();
                         toggleVisibility();
                         savedFullImages.push(croppedCanvas.toDataURL());
                         container.querySelector('#thumbnails').appendChild(thumbnail);
@@ -238,6 +241,7 @@ function render_image_widget($config)
                     cropper.destroy();
                     buttonContainer.style.display = 'none';
                     canvas.style.display = 'none';
+                    downloadBtn.style.display = 'block';
                 }
             }
 
@@ -273,7 +277,10 @@ function render_image_widget($config)
                     });
 
                     savedImages.push(blob);
-                    toggleSaveImageText();
+                    setTimeout(() => {
+                        toggleSaveImageText();
+                    }, 100); // waits 100 milliseconds
+                    // toggleSaveImageText();
                     toggleVisibility();
                     savedFullImages.push(croppedCanvas.toDataURL());
                     container.querySelector('#thumbnails').appendChild(thumbnail);
@@ -288,6 +295,7 @@ function render_image_widget($config)
                 cropper.destroy();
                 buttonContainer.style.display = 'none';
                 canvas.style.display = 'none';
+                downloadBtn.style.display = 'block';
             }
 
 
@@ -467,7 +475,10 @@ function render_image_widget($config)
                         thumbnailElement.remove();
                         savedImages.splice(currentSavedIndex, 1);
                         savedFullImages.splice(currentSavedIndex, 1);
-                        toggleSaveImageText();
+                        setTimeout(() => {
+                            toggleSaveImageText();
+                        }, 100); // waits 100 milliseconds
+                        // toggleSaveImageText();
                         toggleVisibility();
                     }
                 }
