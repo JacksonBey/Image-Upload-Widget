@@ -27,8 +27,8 @@ function render_image_widget($config)
         <!-- <div class="container <?php echo $theme; ?>"> -->
         <div class="container <?php echo $theme; ?>" data-widget-id="<?php echo $unique_id; ?>">
             <!-- <h1>Image Cropper</h1> -->
+            <div style='margin: 20px;'>
             <h3 id="images-text" style="display: none;">Images</h3>
-            <div>
                 <h3 id="saved-thumbnails-text" style="display: none;">Saved</h3>
                 <div id="thumbnails"></div>
                 <button id="download" style="display: none;">Download</button>
@@ -403,7 +403,7 @@ function render_image_widget($config)
 
                 if (hasSavedImages !== newHasSavedImages) {
                     container.querySelector('#images-text').style.display = newHasSavedImages ? 'block' : 'none';
-                    container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
+                    // container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
                     hasSavedImages = newHasSavedImages;
                 }
 
