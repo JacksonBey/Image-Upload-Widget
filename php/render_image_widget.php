@@ -39,6 +39,7 @@ function render_image_widget($config)
             </div>
             <div class="button-container" style="display:none;">
                 <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
+                <button type="button" class="btn btn-danger" id="delete">Delete</button>
                 <button type="button" class="btn btn-primary" id="crop">Crop</button>
                 <button id="rotateClockwise">Rotate Clockwise</button>
                 <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
@@ -52,7 +53,7 @@ function render_image_widget($config)
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
         <script>
             // constraints
             let max_width = <?php echo $max_width; ?>;
@@ -103,7 +104,9 @@ function render_image_widget($config)
                         existingFilesCount = response.count;
                     }
                 };
-                xhr.send(JSON.stringify({ path: file_path }));
+                xhr.send(JSON.stringify({
+                    path: file_path
+                }));
             }
 
             let thumbnailToReplace = null;
@@ -114,7 +117,8 @@ function render_image_widget($config)
             let currentUnsavedIndex = null;
             let hasSavedImages = false;
             let hasUnsavedThumbnails = false;
-            let existingFilesCount = 0; 
+            let existingFilesCount = 0;
+            let currentSavedIndex = null;
 
             // DOM Elements
             const cropBtn = document.getElementById('crop');
@@ -124,6 +128,7 @@ function render_image_widget($config)
             const canvasContainer = document.querySelector('.img-container');
             const saveBtn = document.getElementById('save');
             const downloadBtn = document.getElementById('download');
+            const deleteBtn = document.getElementById('delete');
 
             function initializeEventListeners() {
                 cropBtn.addEventListener('click', cropAndSave);
@@ -141,6 +146,8 @@ function render_image_widget($config)
 
                 const imageInput = document.getElementById('image');
                 imageInput.addEventListener('change', onImageUpload);
+
+                deleteBtn.addEventListener('click', deleteImage);
             }
 
 
@@ -205,6 +212,7 @@ function render_image_widget($config)
                         thumbnail.addEventListener('click', function() {
                             const fullQualityImageSrc = savedFullImages[index];
                             const img = new Image();
+                            currentSavedIndex = index; // Update the currentSavedIndex
                             img.src = fullQualityImageSrc;
                             img.onload = function() {
                                 start(img);
@@ -252,6 +260,7 @@ function render_image_widget($config)
                     thumbnail.addEventListener('click', function() {
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
+                        currentSavedIndex = index; // Update the currentSavedIndex
                         const img = new Image();
                         img.src = fullQualityImageSrc;
                         img.onload = function() {
@@ -420,7 +429,7 @@ function render_image_widget($config)
                     });
             }
             // function downloadImages() {
-                // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
+            // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
             //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
             //     savedImages.forEach((blob, index) => {
             //         const url = URL.createObjectURL(blob);
@@ -440,6 +449,32 @@ function render_image_widget($config)
             //         document.body.removeChild(a);
             //     });
             // }
+
+            function deleteImage() {
+                if (currentUnsavedIndex !== null) {
+                    // Remove from unsaved thumbnails
+                    unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                    renderUnsavedThumbnails();
+                } else if (currentSavedIndex !== null) {
+                    // Remove from saved thumbnails and images
+                    const thumbnailElement = document.querySelector(`[data-index='${currentSavedIndex}']`);
+                    if (thumbnailElement) {
+                        thumbnailElement.remove();
+                        savedImages.splice(currentSavedIndex, 1);
+                        savedFullImages.splice(currentSavedIndex, 1);
+                        toggleSaveImageText();
+                        toggleVisibility();
+                    }
+                }
+                if (cropper) {
+                    cropper.destroy();
+                }
+                buttonContainer.style.display = 'none';
+                canvas.style.display = 'none';
+                currentUnsavedIndex = null;
+                currentSavedIndex = null;
+            }
+
 
 
             // Main Execution

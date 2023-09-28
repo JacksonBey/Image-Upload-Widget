@@ -217,3 +217,23 @@
    background-color: #444444;
    border: 1px solid #555555;
  }
+
+
+ .btn {
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
