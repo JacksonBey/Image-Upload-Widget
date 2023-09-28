@@ -17,6 +17,7 @@ function render_image_widget($config)
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Cropper.js</title>
         <link rel="stylesheet" href="cropper.css">
     </head>
