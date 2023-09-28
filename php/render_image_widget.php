@@ -133,6 +133,8 @@ function render_image_widget($config)
             const saveBtn = container.querySelector('#save');
             const downloadBtn = container.querySelector('#download');
             const deleteBtn = container.querySelector('#delete');
+            const imageInput = container.querySelector('#image');
+
 
             function initializeEventListeners() {
                 cropBtn.addEventListener('click', cropAndSave);
@@ -148,10 +150,9 @@ function render_image_widget($config)
                 canvasContainer.addEventListener('dragover', e => e.preventDefault());
                 canvasContainer.addEventListener('drop', onDrop);
 
-                const imageInput = container.querySelector('#image');
                 imageInput.addEventListener('change', onImageUpload);
 
-                deleteBtn.addEventListener('click', deleteImage());
+                deleteBtn.addEventListener('click', deleteImage);
             }
 
 
@@ -212,6 +213,7 @@ function render_image_widget($config)
 
                         // Change 1: Assign index as data attribute
                         const index = savedImages.length;
+                        thumbnail.dataset.index = index;
 
                         thumbnail.addEventListener('click', function() {
                             const fullQualityImageSrc = savedFullImages[index];
@@ -223,10 +225,6 @@ function render_image_widget($config)
                             };
                         });
                         savedImages.push(blob);
-                        setTimeout(() => {
-                            toggleSaveImageText();
-                        }, 100); // waits 100 milliseconds
-                        // toggleSaveImageText();
                         toggleVisibility();
                         savedFullImages.push(croppedCanvas.toDataURL());
                         container.querySelector('#thumbnails').appendChild(thumbnail);
@@ -242,6 +240,7 @@ function render_image_widget($config)
                     buttonContainer.style.display = 'none';
                     canvas.style.display = 'none';
                     downloadBtn.style.display = 'block';
+                    imageInput.value = '';
                 }
             }
 
@@ -277,10 +276,6 @@ function render_image_widget($config)
                     });
 
                     savedImages.push(blob);
-                    setTimeout(() => {
-                        toggleSaveImageText();
-                    }, 100); // waits 100 milliseconds
-                    // toggleSaveImageText();
                     toggleVisibility();
                     savedFullImages.push(croppedCanvas.toDataURL());
                     container.querySelector('#thumbnails').appendChild(thumbnail);
@@ -296,6 +291,7 @@ function render_image_widget($config)
                 buttonContainer.style.display = 'none';
                 canvas.style.display = 'none';
                 downloadBtn.style.display = 'block';
+                imageInput.value = '';
             }
 
 
