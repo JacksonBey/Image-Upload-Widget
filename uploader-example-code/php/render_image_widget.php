@@ -7,6 +7,8 @@ function render_image_widget($config)
     $min_height = isset($config['min_height']) ? $config['min_height'] : 100;
     $max_photos = isset($config['max_photos']) ? $config['max_photos'] : 10;
     $file_path = $config['file_path'] ?? 'downloads/';
+    $theme = isset($config['theme']) ? $config['theme'] : 'light'; // light or dark
+
 ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -17,12 +19,9 @@ function render_image_widget($config)
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Cropper.js</title>
         <link rel="stylesheet" href="cropper.css">
-        <style>
-            /* Your CSS here */
-        </style>
     </head>
 
-    <body>
+    <body class="<?php echo $theme; ?>">
         <div class="container">
             <h1>Image Cropper</h1>
             <h3 id="images-text" style="display: none;">Images</h3>
@@ -55,12 +54,12 @@ function render_image_widget($config)
         <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script>
             // constraints
-             let max_width = <?php echo $max_width; ?>;
-             let max_height = <?php echo $max_height; ?>;
-             let min_width = <?php echo $min_width; ?>;
-             let min_height = <?php echo $min_height; ?>;
-             let max_photos = <?php echo $max_photos; ?>;
-             let file_path = '<?php echo $file_path; ?>';
+            let max_width = <?php echo $max_width; ?>;
+            let max_height = <?php echo $max_height; ?>;
+            let min_width = <?php echo $min_width; ?>;
+            let min_height = <?php echo $min_height; ?>;
+            let max_photos = <?php echo $max_photos; ?>;
+            let file_path = '<?php echo $file_path; ?>';
 
             function validateImage(imageElement) {
                 const width = imageElement.width;
@@ -115,7 +114,7 @@ function render_image_widget($config)
                 cropBtn.addEventListener('click', cropAndSave);
                 cancelBtn.addEventListener('click', cancelImage);
                 saveBtn.addEventListener('click', function() {
-                    saveImage(); // Assuming saveImage is refactored accordingly
+                    saveImage();
                 });
                 downloadBtn.addEventListener('click', function() {
                     downloadImages();
@@ -373,14 +372,48 @@ function render_image_widget($config)
                 }
             }
 
+            // function downloadImages() {
+            //     Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+            //             const reader = new FileReader();
+            //             reader.onloadend = function() {
+            //                 resolve(reader.result);
+            //             };
+            //             reader.onerror = reject;
+            //             reader.readAsDataURL(blob);
+            //         })))
+            //         .then(dataUrls => {
+            //             const xhr = new XMLHttpRequest();
+            //             xhr.open('POST', 'download_images.php', true);
+            //             xhr.setRequestHeader('Content-Type', 'application/json');
+            //             xhr.send(JSON.stringify({
+            //                 images: dataUrls,
+            //                 path: filePath
+            //             }));
+            //         })
+            //         .catch(error => {
+            //             console.error("Failed to convert blobs to data URLs: ", error);
+            //         });
+            // }
             function downloadImages() {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'download_images.php', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({
-                    images: savedImages.map(img => img.toDataURL('image/jpeg')),
-                    path: filePath
-                }));
+                const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
+                const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
+                savedImages.forEach((blob, index) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    // File renaming logic
+                    if (maxPhotos > 1) {
+                        a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
+                    } else if (maxPhotos === 1 && id) {
+                        a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
+                    }
+                    a.download = `image${index + 1}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                });
             }
 
 

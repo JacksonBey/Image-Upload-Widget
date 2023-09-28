@@ -314,14 +314,40 @@ function toggleVisibility() {
   }
 }
 
+// function downloadImages() {
+//   Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+//       const reader = new FileReader();
+//       reader.onloadend = function() {
+//           resolve(reader.result);
+//       };
+//       reader.onerror = reject;
+//       reader.readAsDataURL(blob);
+//   })))
+//   .then(dataUrls => {
+//       const xhr = new XMLHttpRequest();
+//       xhr.open('POST', 'download_images.php', true);
+//       xhr.setRequestHeader('Content-Type', 'application/json');
+//       xhr.send(JSON.stringify({
+//           images: dataUrls,
+//           path: filePath
+//       }));
+//   })
+//   .catch(error => {
+//       console.error("Failed to convert blobs to data URLs: ", error);
+//   });
+// }
 function downloadImages() {
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', 'download_images.php', true);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.send(JSON.stringify({
-    images: savedImages.map(img => img.toDataURL('image/jpeg')),
-    path: filePath
-  }));
+  savedImages.forEach((blob, index) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `image${index + 1}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+  });
 }
 
 

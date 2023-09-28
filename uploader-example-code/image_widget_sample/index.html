@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Cropper.js</title>
+  <link rel="stylesheet" href="cropper.css">
+  <script src="index.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Image Cropper</h1>
+    <h3 id="images-text" style="display: none;">Images</h3>
+    <div>
+      <h3 id="saved-thumbnails-text" style="display: none;">Saved</h3>
+      <div id="thumbnails"></div>
+      <button id="download" style="display: none;">Download</button>
+    </div>
+    <div class="img-container">
+      <input type="file" name="" id="image" required accept="image/*" multiple>
+    </div>
+    <div class="img-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="button-container" style="display:none;">
+      <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="crop">Crop</button>
+      <button id="rotateClockwise">Rotate Clockwise</button>
+      <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
+      <button id="save">Save without crop</button>
+    </div>
+    <div>
+      <h3 id="unsaved-thumbnails-text" style="display: none;">Unsaved</h3>
+      <div id="unsaved-thumbnails"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
+    integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+
+</html>
