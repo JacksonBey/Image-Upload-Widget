@@ -10,7 +10,7 @@ function render_image_widget($config)
     $theme = isset($config['theme']) ? $config['theme'] : 'light'; // light or dark
 
 ?>
-    <!DOCTYPE html>
+ <!DOCTYPE html>
     <html lang="en">
 
     <head>
@@ -20,11 +20,12 @@ function render_image_widget($config)
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Cropper.js</title>
         <link rel="stylesheet" href="cropper.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
     </head>
-
-    <body class="<?php echo $theme; ?>">
-        <div class="container">
-            <h1>Image Cropper</h1>
+    <body>
+        <div class="container <?php echo $theme; ?>">
+            <!-- <h1>Image Cropper</h1> -->
             <h3 id="images-text" style="display: none;">Images</h3>
             <div>
                 <h3 id="saved-thumbnails-text" style="display: none;">Saved</h3>
@@ -51,8 +52,6 @@ function render_image_widget($config)
             </div>
         </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
         <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
         <script>
             // constraints
@@ -487,7 +486,7 @@ function render_image_widget($config)
             // Execute the main function when the document is ready
             document.addEventListener("DOMContentLoaded", main);
         </script>
-    </body>
+</body>
 
     </html>
 <?php

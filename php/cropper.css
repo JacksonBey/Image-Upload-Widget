@@ -198,22 +198,22 @@
  }
 
  /* Themes */
- body.light {
+.light {
    background-color: #ffffff;
    color: #000000;
  }
 
- body.light .container {
+.light .container {
    background-color: #f1f1f1;
    border: 1px solid #ccc;
  }
 
- body.dark {
+.dark {
    background-color: #333333;
    color: #ffffff;
  }
 
- body.dark .container {
+.dark .container {
    background-color: #444444;
    border: 1px solid #555555;
  }
