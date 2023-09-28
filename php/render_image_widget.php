@@ -480,19 +480,10 @@ function render_image_widget($config)
                         }, 100); // waits 100 milliseconds
                         toggleVisibility();
                     }
-                } else if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
-                    // Remove from saved thumbnails and images
-                    const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
-                    if (thumbnailElement) {
-                        thumbnailElement.remove();
-                        savedImages.splice(currentSavedIndex, 1);
-                        savedFullImages.splice(currentSavedIndex, 1);
-                        setTimeout(() => {
-                            toggleSaveImageText();
-                        }, 100); // waits 100 milliseconds
-                        // toggleSaveImageText();
-                        toggleVisibility();
-                    }
+                } else  if (currentUnsavedIndex !== null && currentUnsavedIndex !== undefined) {
+                    // Remove from unsaved thumbnails
+                    unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                    renderUnsavedThumbnails();
                 }
                 if (cropper) {
                     cropper.destroy();
