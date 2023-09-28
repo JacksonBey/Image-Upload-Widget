@@ -8,7 +8,7 @@ function render_image_widget($config)
     $max_photos = isset($config['max_photos']) ? $config['max_photos'] : 10;
     $file_path = $config['file_path'] ?? 'downloads/';
     $theme = isset($config['theme']) ? $config['theme'] : 'light'; // light or dark
-
+    $unique_id = isset($config['id']) ? $config['id'] : uniqid('widget'); // light or dark
 ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -25,7 +25,8 @@ function render_image_widget($config)
     </head>
 
     <body>
-        <div class="container <?php echo $theme; ?>">
+        <!-- <div class="container <?php echo $theme; ?>"> -->
+        <div class="container <?php echo $theme; ?>" data-widget-id="<?php echo $unique_id; ?>">
             <!-- <h1>Image Cropper</h1> -->
             <h3 id="images-text" style="display: none;">Images</h3>
             <div>
@@ -56,15 +57,9 @@ function render_image_widget($config)
         <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
         <script>
             (function() {
-                <?php
-                $max_width = isset($config['max_width']) ? $config['max_width'] : 800;
-                $max_height = isset($config['max_height']) ? $config['max_height'] : 600;
-                $min_width = isset($config['min_width']) ? $config['min_width'] : 100;
-                $min_height = isset($config['min_height']) ? $config['min_height'] : 100;
-                $max_photos = isset($config['max_photos']) ? $config['max_photos'] : 10;
-                $file_path = $config['file_path'] ?? 'downloads/';
-                $theme = isset($config['theme']) ? $config['theme'] : 'light'; // light or dark
-                ?>
+                const unique_id = <?php echo json_encode($unique_id); ?>;
+                const container = document.querySelector(`[data-widget-id="${unique_id}"]`);
+                console.log('CONTAINER?', container);
 
                 // constraints
                 let max_width = <?php echo $max_width; ?>;
@@ -132,14 +127,14 @@ function render_image_widget($config)
                 let currentSavedIndex = null;
 
                 // DOM Elements
-                const cropBtn = document.getElementById('crop');
-                const cancelBtn = document.getElementById('cancel');
-                const canvas = document.getElementById('canvas');
-                const buttonContainer = document.querySelector('.button-container');
-                const canvasContainer = document.querySelector('.img-container');
-                const saveBtn = document.getElementById('save');
-                const downloadBtn = document.getElementById('download');
-                const deleteBtn = document.getElementById('delete');
+                const cropBtn = container.querySelector('#crop');
+                const cancelBtn = container.querySelector('#cancel');
+                const canvas = container.querySelector('#canvas');
+                const buttonContainer = container.querySelector('.button-container');
+                const canvasContainer = container.querySelector('.img-container');
+                const saveBtn = container.querySelector('#save');
+                const downloadBtn = container.querySelector('#download');
+                const deleteBtn = container.querySelector('#delete');
 
                 function initializeEventListeners() {
                     cropBtn.addEventListener('click', cropAndSave);
@@ -155,7 +150,7 @@ function render_image_widget($config)
                     canvasContainer.addEventListener('dragover', e => e.preventDefault());
                     canvasContainer.addEventListener('drop', onDrop);
 
-                    const imageInput = document.getElementById('image');
+                    const imageInput = container.querySelector('#image');
                     imageInput.addEventListener('change', onImageUpload);
 
                     deleteBtn.addEventListener('click', deleteImage);
@@ -179,16 +174,16 @@ function render_image_widget($config)
                     });
                     buttonContainer.style.display = 'block';
 
-                    document.getElementById('rotateClockwise').addEventListener('click', function() {
+                    container.querySelector('#rotateClockwise').addEventListener('click', function() {
                         cropper.rotate(90);
                     });
 
-                    document.getElementById('rotateCounterClockwise').addEventListener('click', function() {
+                    container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
                         cropper.rotate(-90);
                     });
                 }
 
-                // const cancelBtn = document.getElementById('cancel');
+                // const cancelBtn = container.querySelector('#cancel');
                 function cancelImage() {
                     if (cropper) {
                         cropper.destroy();
@@ -213,7 +208,7 @@ function render_image_widget($config)
                             return;
                         }
                         croppedCanvas.toBlob(function(blob) {
-                            const thumbnail = document.createElement('img');
+                            const thumbnail = container.createElement('img');
                             thumbnail.src = croppedCanvas.toDataURL();
                             thumbnail.width = 100;
 
@@ -233,7 +228,7 @@ function render_image_widget($config)
                             toggleSaveImageText();
                             toggleVisibility();
                             savedFullImages.push(croppedCanvas.toDataURL());
-                            document.getElementById('thumbnails').appendChild(thumbnail);
+                            container.querySelector('#thumbnails').appendChild(thumbnail);
                         }, 'image/jpeg', 1);
 
                         if (currentUnsavedIndex !== null) {
@@ -263,7 +258,7 @@ function render_image_widget($config)
                     }
 
                     croppedCanvas.toBlob(function(blob) {
-                        const thumbnail = document.createElement('img');
+                        const thumbnail = container.createElement('img');
                         thumbnail.src = croppedCanvas.toDataURL();
                         thumbnail.width = 100;
                         thumbnail.dataset.index = savedImages.length;
@@ -283,7 +278,7 @@ function render_image_widget($config)
                         toggleSaveImageText();
                         toggleVisibility();
                         savedFullImages.push(croppedCanvas.toDataURL());
-                        document.getElementById('thumbnails').appendChild(thumbnail);
+                        container.querySelector('#thumbnails').appendChild(thumbnail);
 
                         if (currentUnsavedIndex !== null) {
                             unsavedThumbnails.splice(currentUnsavedIndex, 1);
@@ -298,7 +293,7 @@ function render_image_widget($config)
                 }
 
 
-                // const canvasContainer = document.querySelector('.img-container');
+                // const canvasContainer = container.querySelector('.img-container');
                 // canvasContainer.addEventListener('dragover', function (e) {
                 //   e.preventDefault();
                 // });
@@ -324,7 +319,7 @@ function render_image_widget($config)
                                 const validation = validateImage(img);
                                 if (!validation.isValid) {
                                     alert(validation.error);
-                                    document.getElementById('image').value = '';
+                                    container.querySelector('#image').value = '';
                                     return;
                                 }
                                 unsavedThumbnails.push(img);
@@ -337,7 +332,7 @@ function render_image_widget($config)
                 };
 
                 function renderUnsavedThumbnails() {
-                    const unsavedArea = document.getElementById('unsaved-thumbnails');
+                    const unsavedArea = container.querySelector('#unsaved-thumbnails');
                     unsavedArea.innerHTML = '';
                     unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
                         const thumbnail = new Image();
@@ -374,7 +369,7 @@ function render_image_widget($config)
                                 const validation = validateImage(img);
                                 if (!validation.isValid) {
                                     alert(validation.error);
-                                    document.getElementById('image').value = '';
+                                    container.querySelector('#image').value = '';
                                     return;
                                 }
                                 unsavedThumbnails.push(img);
@@ -387,9 +382,9 @@ function render_image_widget($config)
                 }
 
                 function toggleSaveImageText() {
-                    const imagesText = document.getElementById('images-text');
-                    const downloadBtn = document.getElementById('download');
-                    const thumbnailsArray = document.getElementById('thumbnails').children;
+                    const imagesText = container.querySelector('#images-text');
+                    const downloadBtn = container.querySelector('#download');
+                    const thumbnailsArray = container.querySelector('#thumbnails').children;
                     if (thumbnailsArray.length > 0) {
                         imagesText.style.display = 'block';
                         downloadBtn.style.display = 'block';
@@ -404,13 +399,13 @@ function render_image_widget($config)
                     const newHasUnsavedThumbnails = unsavedThumbnails.length > 0;
 
                     if (hasSavedImages !== newHasSavedImages) {
-                        document.getElementById('images-text').style.display = newHasSavedImages ? 'block' : 'none';
-                        document.getElementById('saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
+                        container.querySelector('#images-text').style.display = newHasSavedImages ? 'block' : 'none';
+                        container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
                         hasSavedImages = newHasSavedImages;
                     }
 
                     if (hasUnsavedThumbnails !== newHasUnsavedThumbnails) {
-                        document.getElementById('unsaved-thumbnails-text').style.display = newHasUnsavedThumbnails ? 'block' : 'none';
+                        container.querySelector('#unsaved-thumbnails-text').style.display = newHasUnsavedThumbnails ? 'block' : 'none';
                         hasUnsavedThumbnails = newHasUnsavedThumbnails;
                     }
                 }
@@ -444,7 +439,7 @@ function render_image_widget($config)
                 //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
                 //     savedImages.forEach((blob, index) => {
                 //         const url = URL.createObjectURL(blob);
-                //         const a = document.createElement('a');
+                //         const a = container.createElement('a');
                 //         a.style.display = 'none';
                 //         a.href = url;
                 //         // File renaming logic
@@ -454,10 +449,10 @@ function render_image_widget($config)
                 //             a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
                 //         }
                 //         a.download = `image${index + 1}.jpg`;
-                //         document.body.appendChild(a);
+                //         container.body.appendChild(a);
                 //         a.click();
                 //         URL.revokeObjectURL(url);
-                //         document.body.removeChild(a);
+                //         container.body.removeChild(a);
                 //     });
                 // }
 
@@ -468,7 +463,7 @@ function render_image_widget($config)
                         renderUnsavedThumbnails();
                     } else if (currentSavedIndex !== null) {
                         // Remove from saved thumbnails and images
-                        const thumbnailElement = document.querySelector(`[data-index='${currentSavedIndex}']`);
+                        const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
                         if (thumbnailElement) {
                             thumbnailElement.remove();
                             savedImages.splice(currentSavedIndex, 1);
