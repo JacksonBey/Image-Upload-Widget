@@ -8,9 +8,9 @@ function render_image_widget($config)
     $max_photos = isset($config['max_photos']) ? $config['max_photos'] : 10;
     $file_path = $config['file_path'] ?? 'downloads/';
     $theme = isset($config['theme']) ? $config['theme'] : 'light'; // light or dark
-    $unique_id = isset($config['id']) ? $config['id'] : uniqid('widget'); // light or dark
+    $unique_id =isset($config['id']) ? $config['id'] : uniqid('widget'); // light or dark
 ?>
-    <!DOCTYPE html>
+ <!DOCTYPE html>
     <html lang="en">
 
     <head>
@@ -23,7 +23,6 @@ function render_image_widget($config)
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
     </head>
-
     <body>
         <!-- <div class="container <?php echo $theme; ?>"> -->
         <div class="container <?php echo $theme; ?>" data-widget-id="<?php echo $unique_id; ?>">
@@ -57,444 +56,444 @@ function render_image_widget($config)
         <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
         <script>
             (function() {
-                const unique_id = <?php echo json_encode($unique_id); ?>;
-                const container = document.querySelector(`[data-widget-id="${unique_id}"]`);
-                console.log('CONTAINER?', container);
+            const unique_id = <?php echo json_encode($unique_id); ?>;
+            const container = document.querySelector(`[data-widget-id="${unique_id}"]`);
 
-                // constraints
-                let max_width = <?php echo $max_width; ?>;
-                let max_height = <?php echo $max_height; ?>;
-                let min_width = <?php echo $min_width; ?>;
-                let min_height = <?php echo $min_height; ?>;
-                let max_photos = <?php echo $max_photos; ?>;
-                let file_path = '<?php echo $file_path; ?>';
+            // constraints
+            let max_width = <?php echo $max_width; ?>;
+            let max_height = <?php echo $max_height; ?>;
+            let min_width = <?php echo $min_width; ?>;
+            let min_height = <?php echo $min_height; ?>;
+            let max_photos = <?php echo $max_photos; ?>;
+            let file_path = '<?php echo $file_path; ?>';
 
-                function validateImage(imageElement) {
-                    const width = imageElement.width;
-                    const height = imageElement.height;
-                    if (savedImages.length >= max_photos) {
-                        alert('Maximum number of photos reached.');
-                        return {
-                            isValid: false,
-                            error: "Maximum number of photos reached."
-                        };
-                    }
-
-                    if ((max_width > 0 && width > max_width) || (max_height > 0 && height > max_height)) {
-                        return {
-                            isValid: false,
-                            error: "Image dimensions exceed maximum limits"
-                        };
-                    }
-
-                    if ((min_width > 0 && width < min_width) || (min_height > 0 && height < min_height)) {
-                        return {
-                            isValid: false,
-                            error: "Image dimensions are below minimum limits"
-                        };
-                    }
-
+            function validateImage(imageElement) {
+                const width = imageElement.width;
+                const height = imageElement.height;
+                if (savedImages.length >= max_photos) {
+                    alert('Maximum number of photos reached.');
                     return {
-                        isValid: true
+                        isValid: false,
+                        error: "Maximum number of photos reached."
                     };
                 }
 
-                // Function to fetch existing file count from the backend
-                function fetchExistingFilesCount() {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', file_path, true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            const response = JSON.parse(xhr.responseText);
-                            existingFilesCount = response.count;
-                        }
+                if ((max_width > 0 && width > max_width) || (max_height > 0 && height > max_height)) {
+                    return {
+                        isValid: false,
+                        error: "Image dimensions exceed maximum limits"
                     };
-                    xhr.send(JSON.stringify({
-                        path: file_path
-                    }));
                 }
 
-                let thumbnailToReplace = null;
-                let cropper = null;
-                let unsavedThumbnails = [];
-                let savedImages = [];
-                let savedFullImages = [];
-                let currentUnsavedIndex = null;
-                let hasSavedImages = false;
-                let hasUnsavedThumbnails = false;
-                let existingFilesCount = 0;
-                let currentSavedIndex = null;
-
-                // DOM Elements
-                const cropBtn = container.querySelector('#crop');
-                const cancelBtn = container.querySelector('#cancel');
-                const canvas = container.querySelector('#canvas');
-                const buttonContainer = container.querySelector('.button-container');
-                const canvasContainer = container.querySelector('.img-container');
-                const saveBtn = container.querySelector('#save');
-                const downloadBtn = container.querySelector('#download');
-                const deleteBtn = container.querySelector('#delete');
-
-                function initializeEventListeners() {
-                    cropBtn.addEventListener('click', cropAndSave);
-                    cancelBtn.addEventListener('click', cancelImage);
-                    saveBtn.addEventListener('click', function() {
-                        saveImage();
-                    });
-                    downloadBtn.addEventListener('click', function() {
-                        downloadImages();
-                    });
-
-
-                    canvasContainer.addEventListener('dragover', e => e.preventDefault());
-                    canvasContainer.addEventListener('drop', onDrop);
-
-                    const imageInput = container.querySelector('#image');
-                    imageInput.addEventListener('change', onImageUpload);
-
-                    deleteBtn.addEventListener('click', deleteImage);
+                if ((min_width > 0 && width < min_width) || (min_height > 0 && height < min_height)) {
+                    return {
+                        isValid: false,
+                        error: "Image dimensions are below minimum limits"
+                    };
                 }
 
+                return {
+                    isValid: true
+                };
+            }
 
-
-
-                function start(imageElement, index) {
-                    currentUnsavedIndex = index; // store the index
-                    const ctx = canvas.getContext('2d');
-                    canvas.style.display = 'block';
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-
-                    if (cropper) {
-                        cropper.destroy();
+            // Function to fetch existing file count from the backend
+            function fetchExistingFilesCount() {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', file_path, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        existingFilesCount = response.count;
                     }
-                    cropper = new Cropper(canvas, {
-                        autoCropArea: 1 // Sets crop box to 100% of the image area
-                    });
-                    buttonContainer.style.display = 'block';
+                };
+                xhr.send(JSON.stringify({
+                    path: file_path
+                }));
+            }
 
-                    container.querySelector('#rotateClockwise').addEventListener('click', function() {
-                        cropper.rotate(90);
-                    });
+            let thumbnailToReplace = null;
+            let cropper = null;
+            let unsavedThumbnails = [];
+            let savedImages = [];
+            let savedFullImages = [];
+            let currentUnsavedIndex = null;
+            let hasSavedImages = false;
+            let hasUnsavedThumbnails = false;
+            let existingFilesCount = 0;
+            let currentSavedIndex = null;
 
-                    container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
-                        cropper.rotate(-90);
-                    });
+            // DOM Elements
+            const cropBtn = container.querySelector('#crop');
+            const cancelBtn = container.querySelector('#cancel');
+            const canvas = container.querySelector('#canvas');
+            const buttonContainer = container.querySelector('.button-container');
+            const canvasContainer = container.querySelector('.img-container');
+            const saveBtn = container.querySelector('#save');
+            const downloadBtn = container.querySelector('#download');
+            const deleteBtn = container.querySelector('#delete');
+
+            function initializeEventListeners() {
+                cropBtn.addEventListener('click', cropAndSave);
+                cancelBtn.addEventListener('click', cancelImage);
+                saveBtn.addEventListener('click', function() {
+                    saveImage();
+                });
+                downloadBtn.addEventListener('click', function() {
+                    downloadImages();
+                });
+
+
+                canvasContainer.addEventListener('dragover', e => e.preventDefault());
+                canvasContainer.addEventListener('drop', onDrop);
+
+                const imageInput = container.querySelector('#image');
+                imageInput.addEventListener('change', onImageUpload);
+
+                deleteBtn.addEventListener('click', deleteImage());
+            }
+
+
+
+
+            function start(imageElement, index) {
+                currentUnsavedIndex = index; // store the index
+                const ctx = canvas.getContext('2d');
+                canvas.style.display = 'block';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+
+                if (cropper) {
+                    cropper.destroy();
                 }
+                cropper = new Cropper(canvas, {
+                    autoCropArea: 1 // Sets crop box to 100% of the image area
+                });
+                buttonContainer.style.display = 'block';
 
-                // const cancelBtn = container.querySelector('#cancel');
-                function cancelImage() {
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    buttonContainer.style.display = 'none';
-                    canvas.style.display = 'none';
+                container.querySelector('#rotateClockwise').addEventListener('click', function() {
+                    cropper.rotate(90);
+                });
+
+                container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
+                    cropper.rotate(-90);
+                });
+            }
+
+            // const cancelBtn = container.querySelector('#cancel');
+            function cancelImage() {
+                if (cropper) {
+                    cropper.destroy();
                 }
+                buttonContainer.style.display = 'none';
+                canvas.style.display = 'none';
+            }
 
-                function cropAndSave() {
-                    // Check for cropper initialization
-                    if (!cropper) {
-                        console.log("Error: Cropper not initialized.");
-                        return;
-                    }
-                    if (cropper) {
-                        const croppedCanvas = cropper.getCroppedCanvas({
-                            width: 160,
-                            height: 160,
-                        });
-                        if (!croppedCanvas) {
-                            console.log("Error: Cropped canvas is null. Make sure crop box is set.");
-                            return;
-                        }
-                        croppedCanvas.toBlob(function(blob) {
-                            const thumbnail = container.createElement('img');
-                            thumbnail.src = croppedCanvas.toDataURL();
-                            thumbnail.width = 100;
-
-                            // Change 1: Assign index as data attribute
-                            const index = savedImages.length;
-
-                            thumbnail.addEventListener('click', function() {
-                                const fullQualityImageSrc = savedFullImages[index];
-                                const img = new Image();
-                                currentSavedIndex = index; // Update the currentSavedIndex
-                                img.src = fullQualityImageSrc;
-                                img.onload = function() {
-                                    start(img);
-                                };
-                            });
-                            savedImages.push(blob);
-                            toggleSaveImageText();
-                            toggleVisibility();
-                            savedFullImages.push(croppedCanvas.toDataURL());
-                            container.querySelector('#thumbnails').appendChild(thumbnail);
-                        }, 'image/jpeg', 1);
-
-                        if (currentUnsavedIndex !== null) {
-                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                            renderUnsavedThumbnails();
-                        }
-                        currentUnsavedIndex = null;
-
-                        cropper.destroy();
-                        buttonContainer.style.display = 'none';
-                        canvas.style.display = 'none';
-                    }
+            function cropAndSave() {
+                // Check for cropper initialization
+                if (!cropper) {
+                    console.log("Error: Cropper not initialized.");
+                    return;
                 }
-
-
-                function saveImage() {
-                    if (!cropper) {
-                        console.error("Error: Cropper not initialized.");
-                        return;
-                    }
-
-                    const croppedCanvas = cropper.getCroppedCanvas();
-
+                if (cropper) {
+                    const croppedCanvas = cropper.getCroppedCanvas({
+                        width: 160,
+                        height: 160,
+                    });
                     if (!croppedCanvas) {
-                        console.error("Error: croppedCanvas is null");
+                        console.log("Error: Cropped canvas is null. Make sure crop box is set.");
                         return;
                     }
-
                     croppedCanvas.toBlob(function(blob) {
-                        const thumbnail = container.createElement('img');
+                        const thumbnail = document.createElement('img');
                         thumbnail.src = croppedCanvas.toDataURL();
                         thumbnail.width = 100;
-                        thumbnail.dataset.index = savedImages.length;
+
+                        // Change 1: Assign index as data attribute
+                        const index = savedImages.length;
 
                         thumbnail.addEventListener('click', function() {
-                            const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                             const fullQualityImageSrc = savedFullImages[index];
-                            currentSavedIndex = index; // Update the currentSavedIndex
                             const img = new Image();
+                            currentSavedIndex = index; // Update the currentSavedIndex
                             img.src = fullQualityImageSrc;
                             img.onload = function() {
                                 start(img);
                             };
                         });
-
                         savedImages.push(blob);
                         toggleSaveImageText();
                         toggleVisibility();
                         savedFullImages.push(croppedCanvas.toDataURL());
                         container.querySelector('#thumbnails').appendChild(thumbnail);
-
-                        if (currentUnsavedIndex !== null) {
-                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                            renderUnsavedThumbnails();
-                        }
-                        currentUnsavedIndex = null;
                     }, 'image/jpeg', 1);
+
+                    if (currentUnsavedIndex !== null) {
+                        unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                        renderUnsavedThumbnails();
+                    }
+                    currentUnsavedIndex = null;
 
                     cropper.destroy();
                     buttonContainer.style.display = 'none';
                     canvas.style.display = 'none';
                 }
+            }
 
 
-                // const canvasContainer = container.querySelector('.img-container');
-                // canvasContainer.addEventListener('dragover', function (e) {
-                //   e.preventDefault();
-                // });
+            function saveImage() {
+                if (!cropper) {
+                    console.error("Error: Cropper not initialized.");
+                    return;
+                }
 
-                const onDrop = (e) => {
-                    e.preventDefault();
-                    const files = e.dataTransfer.files;
-                    const filesArray = Array.from(files);
-                    if (savedImages.length + filesArray.length > max_photos) {
-                        alert('Maximum number of photos reached.');
-                        return;
-                    }
-                    if (existingFilesCount >= max_photos) {
-                        alert('Maximum number of photos reached.');
-                        return;
-                    }
-                    Array.from(files).forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const img = new Image();
-                            img.src = e.target.result;
-                            img.onload = function() {
-                                const validation = validateImage(img);
-                                if (!validation.isValid) {
-                                    alert(validation.error);
-                                    container.querySelector('#image').value = '';
-                                    return;
-                                }
-                                unsavedThumbnails.push(img);
-                                renderUnsavedThumbnails();
-                                start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
-                            };
+                const croppedCanvas = cropper.getCroppedCanvas();
+
+                if (!croppedCanvas) {
+                    console.error("Error: croppedCanvas is null");
+                    return;
+                }
+
+                croppedCanvas.toBlob(function(blob) {
+                    const thumbnail = document.createElement('img');
+                    thumbnail.src = croppedCanvas.toDataURL();
+                    thumbnail.width = 100;
+                    thumbnail.dataset.index = savedImages.length;
+
+                    thumbnail.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                        const fullQualityImageSrc = savedFullImages[index];
+                        currentSavedIndex = index; // Update the currentSavedIndex
+                        const img = new Image();
+                        img.src = fullQualityImageSrc;
+                        img.onload = function() {
+                            start(img);
                         };
-                        reader.readAsDataURL(file);
                     });
-                };
 
-                function renderUnsavedThumbnails() {
-                    const unsavedArea = container.querySelector('#unsaved-thumbnails');
-                    unsavedArea.innerHTML = '';
-                    unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
-                        const thumbnail = new Image();
-                        thumbnail.src = img.src;
-                        thumbnail.width = 100;
-                        thumbnail.style.border = '2px solid red'; // Red border for unsaved
-                        thumbnail.addEventListener('click', function() {
-                            const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
-                            start(originalImage, index); // Pass the actual original image object
-                        });
-                        unsavedArea.appendChild(thumbnail);
-                    });
+                    savedImages.push(blob);
+                    toggleSaveImageText();
                     toggleVisibility();
-                }
+                    savedFullImages.push(croppedCanvas.toDataURL());
+                    container.querySelector('#thumbnails').appendChild(thumbnail);
 
-                function onImageUpload(event) {
-                    const files = event.target.files;
-                    const filesArray = Array.from(files);
-                    if (savedImages.length + filesArray.length >= max_photos) {
-                        alert('Maximum number of photos reached.');
-                        return;
-                    }
-                    if (existingFilesCount >= max_photos) {
-                        alert('Maximum number of photos reached.');
-                        return;
-                    }
-                    Array.from(files).forEach(file => {
-                        const reader = new FileReader();
-
-                        reader.onload = function(e) {
-                            const img = new Image();
-                            img.src = e.target.result;
-                            img.onload = function() {
-                                const validation = validateImage(img);
-                                if (!validation.isValid) {
-                                    alert(validation.error);
-                                    container.querySelector('#image').value = '';
-                                    return;
-                                }
-                                unsavedThumbnails.push(img);
-                                renderUnsavedThumbnails();
-                                start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
-                            };
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                }
-
-                function toggleSaveImageText() {
-                    const imagesText = container.querySelector('#images-text');
-                    const downloadBtn = container.querySelector('#download');
-                    const thumbnailsArray = container.querySelector('#thumbnails').children;
-                    if (thumbnailsArray.length > 0) {
-                        imagesText.style.display = 'block';
-                        downloadBtn.style.display = 'block';
-                    } else {
-                        imagesText.style.display = 'none';
-                        downloadBtn.style.display = 'none';
-                    }
-                }
-
-                function toggleVisibility() {
-                    const newHasSavedImages = savedImages.length > 0;
-                    const newHasUnsavedThumbnails = unsavedThumbnails.length > 0;
-
-                    if (hasSavedImages !== newHasSavedImages) {
-                        container.querySelector('#images-text').style.display = newHasSavedImages ? 'block' : 'none';
-                        container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
-                        hasSavedImages = newHasSavedImages;
-                    }
-
-                    if (hasUnsavedThumbnails !== newHasUnsavedThumbnails) {
-                        container.querySelector('#unsaved-thumbnails-text').style.display = newHasUnsavedThumbnails ? 'block' : 'none';
-                        hasUnsavedThumbnails = newHasUnsavedThumbnails;
-                    }
-                }
-
-                function downloadImages() {
-                    Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onloadend = function() {
-                                resolve(reader.result);
-                            };
-                            reader.onerror = reject;
-                            reader.readAsDataURL(blob);
-                        })))
-                        .then(dataUrls => {
-                            const xhr = new XMLHttpRequest();
-                            xhr.open('POST', 'download_images.php', true);
-                            xhr.setRequestHeader('Content-Type', 'application/json');
-                            xhr.send(JSON.stringify({
-                                images: dataUrls,
-                                path: filePath,
-                                max_photos: max_photos,
-                                existing_files_count: existingFilesCount
-                            }));
-                        })
-                        .catch(error => {
-                            console.error("Failed to convert blobs to data URLs: ", error);
-                        });
-                }
-                // function downloadImages() {
-                // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
-                //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
-                //     savedImages.forEach((blob, index) => {
-                //         const url = URL.createObjectURL(blob);
-                //         const a = container.createElement('a');
-                //         a.style.display = 'none';
-                //         a.href = url;
-                //         // File renaming logic
-                //         if (maxPhotos > 1) {
-                //             a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
-                //         } else if (maxPhotos === 1 && id) {
-                //             a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
-                //         }
-                //         a.download = `image${index + 1}.jpg`;
-                //         container.body.appendChild(a);
-                //         a.click();
-                //         URL.revokeObjectURL(url);
-                //         container.body.removeChild(a);
-                //     });
-                // }
-
-                function deleteImage() {
                     if (currentUnsavedIndex !== null) {
-                        // Remove from unsaved thumbnails
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
                         renderUnsavedThumbnails();
-                    } else if (currentSavedIndex !== null) {
-                        // Remove from saved thumbnails and images
-                        const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
-                        if (thumbnailElement) {
-                            thumbnailElement.remove();
-                            savedImages.splice(currentSavedIndex, 1);
-                            savedFullImages.splice(currentSavedIndex, 1);
-                            toggleSaveImageText();
-                            toggleVisibility();
-                        }
                     }
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    buttonContainer.style.display = 'none';
-                    canvas.style.display = 'none';
                     currentUnsavedIndex = null;
-                    currentSavedIndex = null;
+                }, 'image/jpeg', 1);
+
+                cropper.destroy();
+                buttonContainer.style.display = 'none';
+                canvas.style.display = 'none';
+            }
+
+
+            // const canvasContainer = container.querySelector('.img-container');
+            // canvasContainer.addEventListener('dragover', function (e) {
+            //   e.preventDefault();
+            // });
+
+            const onDrop = (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                const filesArray = Array.from(files);
+                if (savedImages.length + filesArray.length > max_photos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
+                if (existingFilesCount >= max_photos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = function() {
+                            const validation = validateImage(img);
+                            if (!validation.isValid) {
+                                alert(validation.error);
+                                container.querySelector('#image').value = '';
+                                return;
+                            }
+                            unsavedThumbnails.push(img);
+                            renderUnsavedThumbnails();
+                            start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+
+            function renderUnsavedThumbnails() {
+                const unsavedArea = container.querySelector('#unsaved-thumbnails');
+                unsavedArea.innerHTML = '';
+                unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
+                    const thumbnail = new Image();
+                    thumbnail.src = img.src;
+                    thumbnail.width = 100;
+                    thumbnail.style.border = '2px solid red'; // Red border for unsaved
+                    thumbnail.addEventListener('click', function() {
+                        const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
+                        start(originalImage, index); // Pass the actual original image object
+                    });
+                    unsavedArea.appendChild(thumbnail);
+                });
+                toggleVisibility();
+            }
+
+            function onImageUpload(event) {
+                const files = event.target.files;
+                const filesArray = Array.from(files);
+                if (savedImages.length + filesArray.length >= max_photos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
+                if (existingFilesCount >= max_photos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = function() {
+                            const validation = validateImage(img);
+                            if (!validation.isValid) {
+                                alert(validation.error);
+                                container.querySelector('#image').value = '';
+                                return;
+                            }
+                            unsavedThumbnails.push(img);
+                            renderUnsavedThumbnails();
+                            start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function toggleSaveImageText() {
+                const imagesText = container.querySelector('#images-text');
+                const downloadBtn = container.querySelector('#download');
+                const thumbnailsArray = container.querySelector('#thumbnails').children;
+                if (thumbnailsArray.length > 0) {
+                    imagesText.style.display = 'block';
+                    downloadBtn.style.display = 'block';
+                } else {
+                    imagesText.style.display = 'none';
+                    downloadBtn.style.display = 'none';
+                }
+            }
+
+            function toggleVisibility() {
+                const newHasSavedImages = savedImages.length > 0;
+                const newHasUnsavedThumbnails = unsavedThumbnails.length > 0;
+
+                if (hasSavedImages !== newHasSavedImages) {
+                    container.querySelector('#images-text').style.display = newHasSavedImages ? 'block' : 'none';
+                    container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
+                    hasSavedImages = newHasSavedImages;
                 }
 
-
-
-                // Main Execution
-                function main() {
-                    // Main function to execute the script
-                    initializeEventListeners();
-                    fetchExistingFilesCount();
+                if (hasUnsavedThumbnails !== newHasUnsavedThumbnails) {
+                    container.querySelector('#unsaved-thumbnails-text').style.display = newHasUnsavedThumbnails ? 'block' : 'none';
+                    hasUnsavedThumbnails = newHasUnsavedThumbnails;
                 }
+            }
 
-                // Execute the main function when the document is ready
-                document.addEventListener("DOMContentLoaded", main);
-            })();
+            function downloadImages() {
+                Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            resolve(reader.result);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    })))
+                    .then(dataUrls => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'download_images.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.send(JSON.stringify({
+                            images: dataUrls,
+                            path: filePath,
+                            max_photos: max_photos,
+                            existing_files_count: existingFilesCount
+                        }));
+                    })
+                    .catch(error => {
+                        console.error("Failed to convert blobs to data URLs: ", error);
+                    });
+                container.querySelector('#thumbnails').html = '';
+            }
+            // function downloadImages() {
+            // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
+            //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
+            //     savedImages.forEach((blob, index) => {
+            //         const url = URL.createObjectURL(blob);
+            //         const a = container.createElement('a');
+            //         a.style.display = 'none';
+            //         a.href = url;
+            //         // File renaming logic
+            //         if (maxPhotos > 1) {
+            //             a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
+            //         } else if (maxPhotos === 1 && id) {
+            //             a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
+            //         }
+            //         a.download = `image${index + 1}.jpg`;
+            //         container.body.appendChild(a);
+            //         a.click();
+            //         URL.revokeObjectURL(url);
+            //         container.body.removeChild(a);
+            //     });
+            // }
+
+            function deleteImage() {
+                if (currentUnsavedIndex !== null && currentUnsavedIndex !== undefined) {
+                    // Remove from unsaved thumbnails
+                    unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                    renderUnsavedThumbnails();
+                } else if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
+                    // Remove from saved thumbnails and images
+                    const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
+                    if (thumbnailElement) {
+                        thumbnailElement.remove();
+                        savedImages.splice(currentSavedIndex, 1);
+                        savedFullImages.splice(currentSavedIndex, 1);
+                        toggleSaveImageText();
+                        toggleVisibility();
+                    }
+                }
+                if (cropper) {
+                    cropper.destroy();
+                }
+                buttonContainer.style.display = 'none';
+                canvas.style.display = 'none';
+                currentUnsavedIndex = null;
+                currentSavedIndex = null;
+            }
+
+
+
+            // Main Execution
+            function main() {
+                // Main function to execute the script
+                initializeEventListeners();
+                fetchExistingFilesCount();
+            }
+
+            // Execute the main function when the document is ready
+            document.addEventListener("DOMContentLoaded", main);
+        })();
         </script>
-    </body>
+</body>
 
     </html>
 <?php
