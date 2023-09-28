@@ -91,6 +91,20 @@ function render_image_widget($config)
                 };
             }
 
+            // Function to fetch existing file count from the backend
+            function fetchExistingFilesCount() {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', file_path, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        existingFilesCount = response.count;
+                    }
+                };
+                xhr.send(JSON.stringify({ path: file_path }));
+            }
+
             let thumbnailToReplace = null;
             let cropper = null;
             let unsavedThumbnails = [];
@@ -99,7 +113,7 @@ function render_image_widget($config)
             let currentUnsavedIndex = null;
             let hasSavedImages = false;
             let hasUnsavedThumbnails = false;
-
+            let existingFilesCount = 0; 
 
             // DOM Elements
             const cropBtn = document.getElementById('crop');
@@ -276,6 +290,10 @@ function render_image_widget($config)
                     alert('Maximum number of photos reached.');
                     return;
                 }
+                if (existingFilesCount >= maxPhotos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
                 Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -318,6 +336,10 @@ function render_image_widget($config)
                 const files = event.target.files;
                 const filesArray = Array.from(files);
                 if (savedImages.length + filesArray.length >= max_photos) {
+                    alert('Maximum number of photos reached.');
+                    return;
+                }
+                if (existingFilesCount >= maxPhotos) {
                     alert('Maximum number of photos reached.');
                     return;
                 }
@@ -372,55 +394,58 @@ function render_image_widget($config)
                 }
             }
 
-            // function downloadImages() {
-            //     Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
-            //             const reader = new FileReader();
-            //             reader.onloadend = function() {
-            //                 resolve(reader.result);
-            //             };
-            //             reader.onerror = reject;
-            //             reader.readAsDataURL(blob);
-            //         })))
-            //         .then(dataUrls => {
-            //             const xhr = new XMLHttpRequest();
-            //             xhr.open('POST', 'download_images.php', true);
-            //             xhr.setRequestHeader('Content-Type', 'application/json');
-            //             xhr.send(JSON.stringify({
-            //                 images: dataUrls,
-            //                 path: filePath
-            //             }));
-            //         })
-            //         .catch(error => {
-            //             console.error("Failed to convert blobs to data URLs: ", error);
-            //         });
-            // }
             function downloadImages() {
-                const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
-                const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
-                savedImages.forEach((blob, index) => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    // File renaming logic
-                    if (maxPhotos > 1) {
-                        a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
-                    } else if (maxPhotos === 1 && id) {
-                        a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
-                    }
-                    a.download = `image${index + 1}.jpg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                });
+                Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            resolve(reader.result);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    })))
+                    .then(dataUrls => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'download_images.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.send(JSON.stringify({
+                            images: dataUrls,
+                            path: filePath,
+                            max_photos: maxPhotos,
+                            existing_files_count: existingFilesCount
+                        }));
+                    })
+                    .catch(error => {
+                        console.error("Failed to convert blobs to data URLs: ", error);
+                    });
             }
+            // function downloadImages() {
+                // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
+            //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
+            //     savedImages.forEach((blob, index) => {
+            //         const url = URL.createObjectURL(blob);
+            //         const a = document.createElement('a');
+            //         a.style.display = 'none';
+            //         a.href = url;
+            //         // File renaming logic
+            //         if (maxPhotos > 1) {
+            //             a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
+            //         } else if (maxPhotos === 1 && id) {
+            //             a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
+            //         }
+            //         a.download = `image${index + 1}.jpg`;
+            //         document.body.appendChild(a);
+            //         a.click();
+            //         URL.revokeObjectURL(url);
+            //         document.body.removeChild(a);
+            //     });
+            // }
 
 
             // Main Execution
             function main() {
                 // Main function to execute the script
                 initializeEventListeners();
+                fetchExistingFilesCount();
             }
 
             // Execute the main function when the document is ready
