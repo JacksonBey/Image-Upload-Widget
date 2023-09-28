@@ -354,7 +354,7 @@ function render_image_widget($config)
             function onImageUpload(event) {
                 const files = event.target.files;
                 const filesArray = Array.from(files);
-                if (savedImages.length + filesArray.length >= max_photos) {
+                if (savedImages.length + filesArray.length > max_photos) {
                     alert('Maximum number of photos reached.');
                     return;
                 }
