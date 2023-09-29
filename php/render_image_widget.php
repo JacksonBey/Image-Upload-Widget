@@ -428,7 +428,7 @@ function render_image_widget($config)
                         xhr.setRequestHeader('Content-Type', 'application/json');
                         xhr.send(JSON.stringify({
                             images: dataUrls,
-                            path: filePath,
+                            path: file_path,
                             max_photos: max_photos,
                             existing_files_count: existingFilesCount
                         }));

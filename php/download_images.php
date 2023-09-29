@@ -8,6 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     $images = $data['images'];
     $filePath = $data['path'];
+
+    // Check if directory exists, create if not
+    if (!is_dir($filePath)) {
+        mkdir($filePath, 0777, true);
+    }
+
     $maxPhotos = $data['max_photos'];
 
     $existingFilesCount = countFilesInDirectory($filePath);
