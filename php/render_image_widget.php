@@ -41,6 +41,8 @@ function render_image_widget($config)
             </div>
             <div class="img-container">
                 <canvas id="canvas"></canvas>
+                <div class="crop-tooltip">Drag to move, pinch to zoom, and adjust the box to crop.</div>
+
             </div>
             <div class="button-container" style="display:none;">
                 <button type="button" class="btn" id="cancel">Cancel</button>
@@ -137,7 +139,7 @@ function render_image_widget($config)
             const downloadBtn = container.querySelector('#download');
             const deleteBtn = container.querySelector('#delete');
             const imageInput = container.querySelector('#image');
-
+            const tooltip = container.querySelector('.crop-tooltip');
 
             function initializeEventListeners() {
                 cropBtn.addEventListener('click', cropAndSave);
@@ -156,6 +158,14 @@ function render_image_widget($config)
                 imageInput.addEventListener('change', onImageUpload);
 
                 deleteBtn.addEventListener('click', deleteImage);
+
+                canvasContainer.addEventListener('mouseenter', function() {
+                    tooltip.style.display = 'block';
+                });
+
+                canvasContainer.addEventListener('mouseleave', function() {
+                    tooltip.style.display = 'none';
+                });
             }
 
 
@@ -173,6 +183,9 @@ function render_image_widget($config)
                 }
                 cropper = new Cropper(canvas, {
                     autoCropArea: 1 // Sets crop box to 100% of the image area
+                    dragMode: 'move',
+                    cropBoxResizable: true,
+                    cropBoxMovable: true
                 });
                 buttonContainer.style.display = 'block';
 
