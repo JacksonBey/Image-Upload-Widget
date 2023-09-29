@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 function render_image_widget($config)
 {
     $max_width = isset($config['max_width']) ? $config['max_width'] : 800;
