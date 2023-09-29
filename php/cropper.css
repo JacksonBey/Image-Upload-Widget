@@ -390,10 +390,14 @@ img {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.container {
+  position: relative;
+}
+
 .crop-tooltip {
   display: none;
   position: absolute;
-  bottom: 10px;
+  top: 100%;  /* Position it right below the .img-container */
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.7);

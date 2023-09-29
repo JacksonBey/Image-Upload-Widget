@@ -36,12 +36,12 @@ function render_image_widget($config)
                 <div id="thumbnails"></div>
                 <button id="download" style="display: none;">Download</button>
             </div>
-            <div class="img-container">
+            <div class="img-upload-container">
                 <input type="file" name="" id="image" required accept="image/*" multiple>
+
             </div>
-            <div class="img-container">
+            <div class="img-edit-container">
                 <canvas id="canvas"></canvas>
-                <div class="crop-tooltip">Drag to move, pinch to zoom, and adjust the box to crop.</div>
 
             </div>
             <div class="button-container" style="display:none;">
@@ -51,11 +51,14 @@ function render_image_widget($config)
                 <button id="rotateClockwise">Rotate Clockwise</button>
                 <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
                 <button id="save">Save without crop</button>
+
             </div>
             <div>
                 <h3 id="unsaved-thumbnails-text" style="display: none;">Unsaved</h3>
                 <div id="unsaved-thumbnails"></div>
             </div>
+            <div class="crop-tooltip">Drag to move, pinch to zoom, and adjust the box to crop.</div>
+
         </div>
 
         <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
@@ -134,7 +137,8 @@ function render_image_widget($config)
             const cancelBtn = container.querySelector('#cancel');
             const canvas = container.querySelector('#canvas');
             const buttonContainer = container.querySelector('.button-container');
-            const canvasContainer = container.querySelector('.img-container');
+            const canvasContainer = container.querySelector('.img-edit-container');
+            const imageUploadContainer = container.querySelector('.img-upload-container');
             const saveBtn = container.querySelector('#save');
             const downloadBtn = container.querySelector('#download');
             const deleteBtn = container.querySelector('#delete');
@@ -152,8 +156,8 @@ function render_image_widget($config)
                 });
 
 
-                canvasContainer.addEventListener('dragover', e => e.preventDefault());
-                canvasContainer.addEventListener('drop', onDrop);
+                imageUploadContainer.addEventListener('dragover', e => e.preventDefault());
+                imageUploadContainer.addEventListener('drop', onDrop);
 
                 imageInput.addEventListener('change', onImageUpload);
 
@@ -182,7 +186,7 @@ function render_image_widget($config)
                     cropper.destroy();
                 }
                 cropper = new Cropper(canvas, {
-                    autoCropArea: 1 // Sets crop box to 100% of the image area
+                    autoCropArea: 1, // Sets crop box to 100% of the image area
                     dragMode: 'move',
                     cropBoxResizable: true,
                     cropBoxMovable: true
