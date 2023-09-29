@@ -34,7 +34,7 @@ function render_image_widget($config)
             <h3 id="images-text" style="display: none;">Images</h3>
                 <h3 id="saved-thumbnails-text" style="display: none;">Saved</h3>
                 <div id="thumbnails"></div>
-                <button id="download" style="display: none;">Download</button>
+                <button id="download" style="display: none;" class="standard-button">Download</button>
             </div>
             <div class="img-upload-container">
                 <input type="file" name="" id="image" required accept="image/*" multiple>
@@ -45,12 +45,12 @@ function render_image_widget($config)
 
             </div>
             <div class="button-container" style="display:none;">
-                <button type="button" class="btn" id="cancel">Cancel</button>
-                <button type="button" class="btn" id="delete">Delete</button>
-                <button type="button" class="btn" id="crop">Crop</button>
-                <button id="rotateClockwise">Rotate Clockwise</button>
-                <button id="rotateCounterClockwise">Rotate Counter Clockwise</button>
-                <button id="save">Save without crop</button>
+                <button type="button" class="standard-button" id="cancel">Cancel</button>
+                <button type="button" class="standard-button" id="delete">Delete</button>
+                <button type="button" class="standard-button" id="crop">Crop</button>
+                <button id="rotateClockwise" class="standard-button">Rotate Clockwise</button>
+                <button id="rotateCounterClockwise" class="standard-button">Rotate Counter Clockwise</button>
+                <button id="save" class="standard-button">Save without crop</button>
 
             </div>
             <div>

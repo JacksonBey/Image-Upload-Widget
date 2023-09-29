@@ -407,3 +407,31 @@ img {
   font-size: 14px;
   z-index: 1000;
 }
+
+/* Standard Button Style */
+.standard-button {
+  border-radius: 12px;
+  padding: 10px 20px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.standard-button:hover {
+  background-color: #dadada;
+}
+
+/* Dark Mode Button Style */
+.dark .standard-button {
+  background-color: #333;
+  color: white;
+}
+
+.dark .standard-button:hover {
+  background-color: #262626;;
+}
+
+.button-container{
+  margin-top: 10px;
+}
