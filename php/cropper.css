@@ -435,3 +435,38 @@ img {
 .button-container{
   margin-top: 10px;
 }
+
+/* File Upload Container */
+.img-upload-container {
+  text-align: center;
+}
+
+/* Custom File Upload */
+.custom-file-upload {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  background: #f1f1f1;
+  border: 2px dashed #ccc;  /* Changed from solid to dashed */
+  padding: 10px;
+  width: 300px;
+  text-align: center;
+  height: 24px;
+  margin: 20px 0;
+}
+
+/* File Input */
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+/* Custom Text */
+#file-upload-text {
+  font-size: 16px;
+}
+
+.dark #file-upload-text {
+  color: #333;
+}
+
+

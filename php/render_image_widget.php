@@ -37,12 +37,13 @@ function render_image_widget($config)
                 <button id="download" style="display: none;" class="standard-button">Download</button>
             </div>
             <div class="img-upload-container">
-                <input type="file" name="" id="image" required accept="image/*" multiple>
-
+                <label for="image" class="custom-file-upload">
+                    <input type="file" name="" id="image" required accept="image/*" multiple>
+                    <span id="file-upload-text">Drag Your File(s) Here or Click to Choose</span>
+                </label>
             </div>
             <div class="img-edit-container">
                 <canvas id="canvas"></canvas>
-
             </div>
             <div class="button-container" style="display:none;">
                 <button type="button" class="standard-button" id="cancel">Cancel</button>
