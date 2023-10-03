@@ -1,4 +1,4 @@
-
+/* 
 .container {
   margin: 20px auto;
   max-width: 640px;
@@ -12,15 +12,6 @@ img {
   display: none;
 }
 
-/*!
- * Cropper.js v1.5.12
- * https://fengyuanchen.github.io/cropperjs
- *
- * Copyright 2015-present Chen Fengyuan
- * Released under the MIT license
- *
- * Date: 2021-06-12T08:00:11.623Z
- */
 
  .cropper-container {
   direction: ltr;
@@ -317,11 +308,6 @@ img {
   cursor: not-allowed;
 }
 
-/* .cropper-container {
-  visibility: hidden;
-} */
-
-/* Add basic styling for the drop area */
 #image {
   width: 300px;
   height: 200px;
@@ -330,7 +316,6 @@ img {
   margin: 20px;
 }
 
-/* Responsiveness */
 @media only screen and (max-width: 768px) {
   .cropper-container {
     max-width: 100%;
@@ -348,7 +333,6 @@ img {
 }
 
 
-/* Light theme */
 .light {
   background-color: #ffffff;
   color: #000000;
@@ -359,7 +343,6 @@ img {
   border: 1px solid #ccc;
 }
 
-/* Dark theme */
 .dark {
   background-color: #333333;
   color: #ffffff;
@@ -370,7 +353,6 @@ img {
   border: 1px solid #555555;
 }
 
-/* Light and Dark Modes */
 :root {
   --primary-bg: white;
   --primary-text: black;
@@ -384,8 +366,7 @@ img {
   color: var(--primary-text);
 }
 
-/* Modern UI Enhancements */
 .cropper-container {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+} */
