@@ -6,6 +6,12 @@ function countFilesInDirectory($dir) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
+
+    // Validate JSON payload
+    if (!isset($data['images'], $data['path'], $data['max_photos'])) {
+        echo json_encode(["status" => "invalid_payload"]);
+        exit;
+    }
     $images = $data['images'];
     $filePath = $data['path'];
 
