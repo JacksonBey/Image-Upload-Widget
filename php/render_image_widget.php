@@ -34,7 +34,7 @@ function render_image_widget($config)
             <h3 id="images-text" style="display: none;">Images</h3>
                 <h3 id="saved-thumbnails-text" style="display: none;">Saved</h3>
                 <div id="thumbnails"></div>
-                <button id="download" style="display: none;" class="standard-button">Download</button>
+                <button id="download" style="display: none;" class="standard-button">Upload</button>
             </div>
             <div class="img-upload-container">
                 <label for="image" class="custom-file-upload">
