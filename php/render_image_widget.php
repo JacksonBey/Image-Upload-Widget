@@ -116,6 +116,7 @@ function render_image_widget($config)
             let hasUnsavedThumbnails = false;
             let existingFilesCount = 0;
             let currentSavedIndex = null;
+            let originalWidth, originalHeight;
 
             // DOM Elements
             const cropBtn = container.querySelector('#crop');
@@ -145,6 +146,13 @@ function render_image_widget($config)
                 imageUploadContainer.addEventListener('drop', onDrop);
 
                 imageInput.addEventListener('change', onImageUpload);
+
+                imageElement.addEventListener('load', function () {
+                    console.log('LOAD')
+                    originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
+                    originalHeight = this.naturalHeight;
+                    aspectRatio = originalWidth / originalHeight;
+                }, false);
 
                 deleteBtn.addEventListener('click', deleteImage);
 
@@ -236,9 +244,20 @@ function render_image_widget($config)
                     return;
                 }
                 if (cropper) {
+
+                    // Get the cropping box dimensions
+                    const cropData = cropper.getData();
+                    const cropWidth = cropData.width;
+                    const cropHeight = cropData.height;
+
+                    // Calculate new dimensions while keeping the original aspect ratio
+                    const newWidth = cropWidth;
+                    const newHeight = cropWidth / aspectRatio;
                     const croppedCanvas = cropper.getCroppedCanvas({
-                        width: 160,
-                        height: 160,
+                        width: newWidth,
+                        height: newHeight,
+                        imageSmoothingEnabled: false,
+                        imageSmoothingQuality: 'high',
                     });
                     if (!croppedCanvas) {
                         console.log("Error: Cropped canvas is null. Make sure crop box is set.");
@@ -289,7 +308,12 @@ function render_image_widget($config)
                     return;
                 }
 
-                const croppedCanvas = cropper.getCroppedCanvas();
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    width: originalWidth,
+                    height: originalHeight,
+                    imageSmoothingEnabled: false,
+                    imageSmoothingQuality: 'high',
+                });
 
                 if (!croppedCanvas) {
                     console.error("Error: croppedCanvas is null");
@@ -468,7 +492,8 @@ function render_image_widget($config)
             //         path: file_path
             //     }));
             // }
-
+   
+            //send to server
             function downloadImages() {
                 Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
                         const reader = new FileReader();
@@ -482,6 +507,16 @@ function render_image_widget($config)
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', 'download_images.php', true);
                         xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.onreadystatechange = function() { // Added this block for handling response
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.status === 'success') {
+                                    alert('Images successfully uploaded.'); // Success message here
+                                } else {
+                                    alert('Upload failed: ' + response.status);
+                                }
+                            }
+                        };
                         xhr.send(JSON.stringify({
                             images: dataUrls,
                             path: file_path,
@@ -494,6 +529,8 @@ function render_image_widget($config)
                     });
                 container.querySelector('#thumbnails').html = '';
             }
+
+            // save to local machine
             // function downloadImages() {
             // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
             //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
