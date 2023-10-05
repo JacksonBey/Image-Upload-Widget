@@ -128,7 +128,7 @@ function render_image_widget($config)
             const saveBtn = container.querySelector('#save');
             const downloadBtn = container.querySelector('#download');
             const deleteBtn = container.querySelector('#delete');
-            const imageInput = container.querySelector('#image');
+            let imageInput = container.querySelector('#image');
             const tooltip = container.querySelector('.crop-tooltip');
 
             function initializeEventListeners() {
@@ -143,16 +143,64 @@ function render_image_widget($config)
 
 
                 imageUploadContainer.addEventListener('dragover', e => e.preventDefault());
-                imageUploadContainer.addEventListener('drop', onDrop);
+                // imageUploadContainer.addEventListener('drop', function(e) {
+                //     console.log('LOAD natty X/Y: ', this.naturalWidth, this.naturalHeight, e.natualWidth)
+                //     originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
+                //     originalHeight = this.naturalHeight;
+                //     aspectRatio = originalWidth / originalHeight;
+                //     onDrop(e)
+                // });
+                imageUploadContainer.addEventListener('drop', function(e) {
+                    const files = e.dataTransfer.files; // This will give you the FileList
+                    if (files.length > 0) {
+                        const file = files[0]; // Assuming you're interested in the first file
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+                        
+                        img.onload = function() {
+                            console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
+                            originalWidth = this.naturalWidth;
+                            originalHeight = this.naturalHeight;
+                            aspectRatio = originalWidth / originalHeight;
+                            // Call your onDrop function here if necessary.
+                            URL.revokeObjectURL(objectUrl);
+                        };
+                        
+                        img.src = objectUrl;
+                    }
+                    onDrop(e)
+                });
 
-                imageInput.addEventListener('change', onImageUpload);
+                imageInput = container.querySelector('#image');
+                console.log(imageInput)
+                // imageInput.addEventListener('change',function (e) {
+                //     console.log('LOAD natty X/Y: ', this.naturalWidth, this.naturalHeight)
+                //     originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
+                //     originalHeight = this.naturalHeight;
+                //     aspectRatio = originalWidth / originalHeight;
+                //     onImageUpload(e)
 
-                imageElement.addEventListener('load', function () {
-                    console.log('LOAD')
-                    originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
-                    originalHeight = this.naturalHeight;
-                    aspectRatio = originalWidth / originalHeight;
-                }, false);
+                // } );
+                imageInput.addEventListener('change', function(e) {
+                    const files = e.target.files; // This will give you the FileList
+                    if (files.length > 0) {
+                        const file = files[0]; // Assuming you're interested in the first file
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+
+                        img.onload = function() {
+                            console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
+                            originalWidth = this.naturalWidth;
+                            originalHeight = this.naturalHeight;
+                            aspectRatio = originalWidth / originalHeight;
+                            URL.revokeObjectURL(objectUrl);
+                        };
+
+                        img.src = objectUrl;
+                    }
+                    onImageUpload(e);
+                });
+
 
                 deleteBtn.addEventListener('click', deleteImage);
 
@@ -307,7 +355,7 @@ function render_image_widget($config)
                     console.error("Error: Cropper not initialized.");
                     return;
                 }
-
+                console.log('ORIGINAL DIMANESIONS?: ', originalWidth, originalHeight)
                 const croppedCanvas = cropper.getCroppedCanvas({
                     width: originalWidth,
                     height: originalHeight,
@@ -494,64 +542,64 @@ function render_image_widget($config)
             // }
    
             //send to server
-            function downloadImages() {
-                Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = function() {
-                            resolve(reader.result);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    })))
-                    .then(dataUrls => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'download_images.php', true);
-                        xhr.setRequestHeader('Content-Type', 'application/json');
-                        xhr.onreadystatechange = function() { // Added this block for handling response
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                const response = JSON.parse(xhr.responseText);
-                                if (response.status === 'success') {
-                                    alert('Images successfully uploaded.'); // Success message here
-                                } else {
-                                    alert('Upload failed: ' + response.status);
-                                }
-                            }
-                        };
-                        xhr.send(JSON.stringify({
-                            images: dataUrls,
-                            path: file_path,
-                            max_photos: max_photos,
-                            existing_files_count: existingFilesCount
-                        }));
-                    })
-                    .catch(error => {
-                        console.error("Failed to convert blobs to data URLs: ", error);
-                    });
-                container.querySelector('#thumbnails').html = '';
-            }
+            // function downloadImages() {
+            //     Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+            //             const reader = new FileReader();
+            //             reader.onloadend = function() {
+            //                 resolve(reader.result);
+            //             };
+            //             reader.onerror = reject;
+            //             reader.readAsDataURL(blob);
+            //         })))
+            //         .then(dataUrls => {
+            //             const xhr = new XMLHttpRequest();
+            //             xhr.open('POST', 'download_images.php', true);
+            //             xhr.setRequestHeader('Content-Type', 'application/json');
+            //             xhr.onreadystatechange = function() { // Added this block for handling response
+            //                 if (xhr.readyState === 4 && xhr.status === 200) {
+            //                     const response = JSON.parse(xhr.responseText);
+            //                     if (response.status === 'success') {
+            //                         alert('Images successfully uploaded.'); // Success message here
+            //                     } else {
+            //                         alert('Upload failed: ' + response.status);
+            //                     }
+            //                 }
+            //             };
+            //             xhr.send(JSON.stringify({
+            //                 images: dataUrls,
+            //                 path: file_path,
+            //                 max_photos: max_photos,
+            //                 existing_files_count: existingFilesCount
+            //             }));
+            //         })
+            //         .catch(error => {
+            //             console.error("Failed to convert blobs to data URLs: ", error);
+            //         });
+            //     container.querySelector('#thumbnails').html = '';
+            // }
 
             // save to local machine
-            // function downloadImages() {
-            // const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
-            //     const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
-            //     savedImages.forEach((blob, index) => {
-            //         const url = URL.createObjectURL(blob);
-            //         const a = document.createElement('a');
-            //         a.style.display = 'none';
-            //         a.href = url;
-            //         // File renaming logic
-            //         if (maxPhotos > 1) {
-            //             a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
-            //         } else if (maxPhotos === 1 && id) {
-            //             a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
-            //         }
-            //         a.download = `image${index + 1}.jpg`;
-            //         document.body.appendChild(a);
-            //         a.click();
-            //         URL.revokeObjectURL(url);
-            //         document.body.removeChild(a);
-            //     });
-            // }
+            function downloadImages() {
+            const maxPhotos = <?php echo json_encode($max_photos); ?>; // Fetch max_photos from PHP
+                const id = <?php echo json_encode($id ?? null); ?>; // Fetch $id from PHP if it exists
+                savedImages.forEach((blob, index) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    // File renaming logic
+                    if (maxPhotos > 1) {
+                        a.download = `${index + 1}.jpg`; // If max number of files is greater than 1
+                    } else if (maxPhotos === 1 && id) {
+                        a.download = `${id}.jpg`; // If max number of files is 1 and $id is available
+                    }
+                    a.download = `image${index + 1}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                });
+            }
 
             function deleteImage() {
                 if (currentSavedIndex !== null && currentSavedIndex !== undefined) {

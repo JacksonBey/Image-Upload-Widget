@@ -29,11 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    function generateUniqueFilename($filePath, $index) {
+        $baseName = "image{$index}.jpg";
+        $uniqueName = $baseName;
+        $count = 1;
+    
+        while (file_exists($filePath . $uniqueName)) {
+            $uniqueName = "image{$index}-{$count}.jpg";
+            $count++;
+        }
+    
+        return $uniqueName;
+    }
+
     foreach ($images as $index => $imageData) {
         $imageData = str_replace('data:image/jpeg;base64,', '', $imageData);
         $imageData = str_replace(' ', '+', $imageData);
         $data = base64_decode($imageData);
-        $file = $filePath . "image{$index}.jpg";
+        $uniqueFile = generateUniqueFilename($filePath, $index);
+        $file = $filePath . $uniqueFile;
         file_put_contents($file, $data);
     }
     echo json_encode(["status" => "success"]);
