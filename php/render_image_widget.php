@@ -61,8 +61,6 @@ function render_image_widget($config)
             <div class="crop-tooltip">Drag to move, pinch to zoom, and adjust the box to crop.</div>
 
         </div>
-
-        <!-- <script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> -->
         <script>
             (function() {
             const unique_id = <?php echo json_encode($unique_id); ?>;
@@ -117,6 +115,7 @@ function render_image_widget($config)
             let existingFilesCount = 0;
             let currentSavedIndex = null;
             let originalWidth, originalHeight;
+            let hasRotateEventAdded = false;
 
             // DOM Elements
             const cropBtn = container.querySelector('#crop');
@@ -151,7 +150,6 @@ function render_image_widget($config)
                         const objectUrl = URL.createObjectURL(file);
                         
                         img.onload = function() {
-                            // console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
                             originalWidth = this.naturalWidth;
                             originalHeight = this.naturalHeight;
                             aspectRatio = originalWidth / originalHeight;
@@ -173,7 +171,6 @@ function render_image_widget($config)
                         const objectUrl = URL.createObjectURL(file);
 
                         img.onload = function() {
-                            // console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
                             originalWidth = this.naturalWidth;
                             originalHeight = this.naturalHeight;
                             aspectRatio = originalWidth / originalHeight;
@@ -185,7 +182,6 @@ function render_image_widget($config)
                     onImageUpload(e);
                 });
 
-
                 deleteBtn.addEventListener('click', deleteImage);
 
                 canvasContainer.addEventListener('mouseenter', function() {
@@ -196,9 +192,6 @@ function render_image_widget($config)
                     tooltip.style.display = 'none';
                 });
             }
-
-
-
 
             // function start(imageElement, index) {
             //     currentUnsavedIndex = index; // store the index
@@ -280,8 +273,6 @@ function render_image_widget($config)
                 const dy = (canvas.height - drawHeight) / 2;
 
                 ctx.drawImage(imageElement, dx, dy, drawWidth, drawHeight);
-                console.log('drawWidth: ', drawWidth, 'drawHeight: ', drawHeight)
-                console.log('dx: ', dx, 'dy: ', dy)
                 buttonContainer.style.display = 'block';
 
                 if (cropper) {
@@ -296,22 +287,6 @@ function render_image_widget($config)
                     dragMode: 'move',
                     cropBoxResizable: true,
                     cropBoxMovable: true,
-                    // ready: function () {
-                    //     console.log('Cropper is ready');
-                    //     const cropBoxWidth = drawWidth; // or some other width based on your needs
-                    //     const cropBoxHeight = drawHeight; // or some other height based on your needs
-                    //     const cropBoxLeft = (canvas.width - cropBoxWidth) / 2;
-                    //     const cropBoxTop = (canvas.height - cropBoxHeight) / 2;
-                    //     console.log(`Calculated crop box data: left=${cropBoxLeft}, top=${cropBoxTop}, width=${cropBoxWidth}, height=${cropBoxHeight}`);
-                    //     console.log('Crop box data before setting:', cropper.getCropBoxData());
-                    //     cropper.setCropBoxData({
-                    //         // left: cropBoxLeft,
-                    //         // top: cropBoxTop,
-                    //         width: cropBoxWidth,
-                    //         height: cropBoxHeight
-                    //     });
-                    //     console.log('Crop box data after setting:', cropper.getCropBoxData());
-                    // }
                     ready: function () {
                         const cropBoxWidth = drawWidth; 
                         const cropBoxHeight = drawHeight; 
@@ -339,7 +314,9 @@ function render_image_widget($config)
 
                 });
 
-
+                if(hasRotateEventAdded) {
+                    return;
+                }
                 // Rotation events
                 container.querySelector('#rotateClockwise').addEventListener('click', function() {
                     cropper.rotate(90);
@@ -348,10 +325,10 @@ function render_image_widget($config)
                 container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
                     cropper.rotate(-90);
                 });
+                hasRotateEventAdded = true;
             }
 
 
-            // const cancelBtn = container.querySelector('#cancel');
             function cancelImage() {
                 if (cropper) {
                     cropper.destroy();
@@ -431,7 +408,6 @@ function render_image_widget($config)
                     console.error("Error: Cropper not initialized.");
                     return;
                 }
-                console.log('ORIGINAL DIMANESIONS?: ', originalWidth, originalHeight)
                 const croppedCanvas = cropper.getCroppedCanvas({
                     width: originalWidth,
                     height: originalHeight,
@@ -466,7 +442,6 @@ function render_image_widget($config)
                     savedFullImages.push(croppedCanvas.toDataURL());
                     container.querySelector('#thumbnails').appendChild(thumbnail);
 
-                    console.log('CURRENT UNSAVED INDEX: ', currentUnsavedIndex)
 
                     if (currentUnsavedIndex !== null) {
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
@@ -481,12 +456,6 @@ function render_image_widget($config)
                 downloadBtn.style.display = 'block';
                 imageInput.value = '';
             }
-
-
-            // const canvasContainer = container.querySelector('.img-container');
-            // canvasContainer.addEventListener('dragover', function (e) {
-            //   e.preventDefault();
-            // });
 
             const onDrop = (e) => {
                 e.preventDefault();
@@ -600,22 +569,6 @@ function render_image_widget($config)
                     hasUnsavedThumbnails = newHasUnsavedThumbnails;
                 }
             }
-
-            // // Function to fetch existing file count from the backend
-            // function fetchExistingFilesCount() {
-            //     const xhr = new XMLHttpRequest();
-            //     xhr.open('POST', file_path, true);
-            //     xhr.setRequestHeader('Content-Type', 'application/json');
-            //     xhr.onreadystatechange = function() {
-            //         if (xhr.readyState === 4 && xhr.status === 200) {
-            //             const response = JSON.parse(xhr.responseText);
-            //             existingFilesCount = response.count;
-            //         }
-            //     };
-            //     xhr.send(JSON.stringify({
-            //         path: file_path
-            //     }));
-            // }
    
             //send to server
             function downloadImages() {
