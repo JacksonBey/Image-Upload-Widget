@@ -143,13 +143,6 @@ function render_image_widget($config)
 
 
                 imageUploadContainer.addEventListener('dragover', e => e.preventDefault());
-                // imageUploadContainer.addEventListener('drop', function(e) {
-                //     console.log('LOAD natty X/Y: ', this.naturalWidth, this.naturalHeight, e.natualWidth)
-                //     originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
-                //     originalHeight = this.naturalHeight;
-                //     aspectRatio = originalWidth / originalHeight;
-                //     onDrop(e)
-                // });
                 imageUploadContainer.addEventListener('drop', function(e) {
                     const files = e.dataTransfer.files; // This will give you the FileList
                     if (files.length > 0) {
@@ -158,7 +151,7 @@ function render_image_widget($config)
                         const objectUrl = URL.createObjectURL(file);
                         
                         img.onload = function() {
-                            console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
+                            // console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
                             originalWidth = this.naturalWidth;
                             originalHeight = this.naturalHeight;
                             aspectRatio = originalWidth / originalHeight;
@@ -172,15 +165,6 @@ function render_image_widget($config)
                 });
 
                 imageInput = container.querySelector('#image');
-                console.log(imageInput)
-                // imageInput.addEventListener('change',function (e) {
-                //     console.log('LOAD natty X/Y: ', this.naturalWidth, this.naturalHeight)
-                //     originalWidth = this.naturalWidth;  // Note: Use 'naturalWidth' and 'naturalHeight'
-                //     originalHeight = this.naturalHeight;
-                //     aspectRatio = originalWidth / originalHeight;
-                //     onImageUpload(e)
-
-                // } );
                 imageInput.addEventListener('change', function(e) {
                     const files = e.target.files; // This will give you the FileList
                     if (files.length > 0) {
@@ -189,7 +173,7 @@ function render_image_widget($config)
                         const objectUrl = URL.createObjectURL(file);
 
                         img.onload = function() {
-                            console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
+                            // console.log('Natural Width:', this.naturalWidth, 'Natural Height:', this.naturalHeight);
                             originalWidth = this.naturalWidth;
                             originalHeight = this.naturalHeight;
                             aspectRatio = originalWidth / originalHeight;
@@ -216,56 +200,147 @@ function render_image_widget($config)
 
 
 
+            // function start(imageElement, index) {
+            //     currentUnsavedIndex = index; // store the index
+            //     // const ctx = canvas.getContext('2d');
+            //     // canvas.style.display = 'block';
+            //     // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            //     // ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+
+            //     const imageAspectRatio = imageElement.width / imageElement.height;
+            //     const canvasAspectRatio = canvas.width / canvas.height;
+            //     let drawWidth = canvas.width;
+            //     let drawHeight = canvas.height;
+
+            //     // Maintain the original aspect ratio of the image.
+            //     if (imageAspectRatio > canvasAspectRatio) {
+            //         drawHeight = canvas.width / imageAspectRatio;
+            //     } else {
+            //         drawWidth = canvas.height * imageAspectRatio;
+            //     }
+
+            //     const ctx = canvas.getContext('2d');
+            //     canvas.style.display = 'block';
+            //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            //     // Draw the image at the center of the canvas, maintaining its aspect ratio.
+            //     // const dx = (canvas.width - drawWidth) / 2;
+            //     // const dy = (canvas.height - drawHeight) / 2;
+            //     const dx = 0
+            //     const dy = 0
+            //     ctx.drawImage(imageElement, dx, dy, drawWidth, drawHeight);
+
+            //     if (cropper) {
+            //         cropper.destroy();
+            //     }
+            //     cropper = new Cropper(canvas, {
+            //         // aspectRatio: 1,  // Add aspect ratio (change the value as per your requirement)
+            //         autoCropArea: 1, // Sets crop box to 100% of the image area
+            //         dragMode: 'move',
+            //         cropBoxResizable: true,
+            //         cropBoxMovable: true,
+            //         ready: function () {
+            //             cropper.setCropBoxData({
+            //                 // left: dx,
+            //                 // top: dy,
+            //                 width: drawWidth,
+            //                 height: drawHeight
+            //             });
+            //         }
+            //     });
+            //     buttonContainer.style.display = 'block';
+
+            //     container.querySelector('#rotateClockwise').addEventListener('click', function() {
+            //         cropper.rotate(90);
+            //     });
+
+            //     container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
+            //         cropper.rotate(-90);
+            //     });
+            // }
+
             function start(imageElement, index) {
-                currentUnsavedIndex = index; // store the index
-                // const ctx = canvas.getContext('2d');
-                // canvas.style.display = 'block';
-                // ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-
-                const imageAspectRatio = imageElement.width / imageElement.height;
+                currentUnsavedIndex = index;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const imageAspectRatio = imageElement.naturalWidth / imageElement.naturalHeight;
                 const canvasAspectRatio = canvas.width / canvas.height;
-                let drawWidth = canvas.width;
-                let drawHeight = canvas.height;
-
-                // Maintain the original aspect ratio of the image.
+                
+                let drawWidth, drawHeight;
                 if (imageAspectRatio > canvasAspectRatio) {
+                    drawWidth = canvas.width;
                     drawHeight = canvas.width / imageAspectRatio;
                 } else {
+                    drawHeight = canvas.height;
                     drawWidth = canvas.height * imageAspectRatio;
                 }
 
-                const ctx = canvas.getContext('2d');
-                canvas.style.display = 'block';
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const dx = (canvas.width - drawWidth) / 2;
+                const dy = (canvas.height - drawHeight) / 2;
 
-                // Draw the image at the center of the canvas, maintaining its aspect ratio.
-                // const dx = (canvas.width - drawWidth) / 2;
-                // const dy = (canvas.height - drawHeight) / 2;
-                const dx = 0
-                const dy = 0
                 ctx.drawImage(imageElement, dx, dy, drawWidth, drawHeight);
+                console.log('drawWidth: ', drawWidth, 'drawHeight: ', drawHeight)
+                console.log('dx: ', dx, 'dy: ', dy)
+                buttonContainer.style.display = 'block';
 
                 if (cropper) {
                     cropper.destroy();
                 }
+
+                // Calculate the centers
+                const imageCenterX = dx + (drawWidth / 2);
+                const imageCenterY = dy + (drawHeight / 2);
                 cropper = new Cropper(canvas, {
-                    // aspectRatio: 1,  // Add aspect ratio (change the value as per your requirement)
-                    autoCropArea: 1, // Sets crop box to 100% of the image area
+                    autoCropArea: 1,
                     dragMode: 'move',
                     cropBoxResizable: true,
                     cropBoxMovable: true,
+                    // ready: function () {
+                    //     console.log('Cropper is ready');
+                    //     const cropBoxWidth = drawWidth; // or some other width based on your needs
+                    //     const cropBoxHeight = drawHeight; // or some other height based on your needs
+                    //     const cropBoxLeft = (canvas.width - cropBoxWidth) / 2;
+                    //     const cropBoxTop = (canvas.height - cropBoxHeight) / 2;
+                    //     console.log(`Calculated crop box data: left=${cropBoxLeft}, top=${cropBoxTop}, width=${cropBoxWidth}, height=${cropBoxHeight}`);
+                    //     console.log('Crop box data before setting:', cropper.getCropBoxData());
+                    //     cropper.setCropBoxData({
+                    //         // left: cropBoxLeft,
+                    //         // top: cropBoxTop,
+                    //         width: cropBoxWidth,
+                    //         height: cropBoxHeight
+                    //     });
+                    //     console.log('Crop box data after setting:', cropper.getCropBoxData());
+                    // }
                     ready: function () {
+                        const cropBoxWidth = drawWidth; 
+                        const cropBoxHeight = drawHeight; 
+                        
+                        // Existing center of the crop box, if it's already been set
+                        const existingCropBoxData = cropper.getCropBoxData();
+                        const existingCropBoxCenterX = existingCropBoxData.left + (existingCropBoxData.width / 2);
+                        const existingCropBoxCenterY = existingCropBoxData.top + (existingCropBoxData.height / 2);
+
+                        // Intended new center of the crop box (which should be the same as the old center)
+                        const cropBoxCenterX = existingCropBoxCenterX; 
+                        const cropBoxCenterY = existingCropBoxCenterY; 
+
+                        // Calculate new top-left corner based on the new center
+                        const cropBoxLeft = cropBoxCenterX - (cropBoxWidth / 2);
+                        const cropBoxTop = cropBoxCenterY - (cropBoxHeight / 2);
+                        
                         cropper.setCropBoxData({
-                            // left: dx,
-                            // top: dy,
-                            width: drawWidth,
-                            height: drawHeight
+                            left: cropBoxLeft,
+                            top: cropBoxTop,
+                            width: cropBoxWidth,
+                            height: cropBoxHeight
                         });
                     }
-                });
-                buttonContainer.style.display = 'block';
 
+                });
+
+
+                // Rotation events
                 container.querySelector('#rotateClockwise').addEventListener('click', function() {
                     cropper.rotate(90);
                 });
@@ -274,6 +349,7 @@ function render_image_widget($config)
                     cropper.rotate(-90);
                 });
             }
+
 
             // const cancelBtn = container.querySelector('#cancel');
             function cancelImage() {
