@@ -193,65 +193,6 @@ function render_image_widget($config)
                 });
             }
 
-            // function start(imageElement, index) {
-            //     currentUnsavedIndex = index; // store the index
-            //     // const ctx = canvas.getContext('2d');
-            //     // canvas.style.display = 'block';
-            //     // ctx.clearRect(0, 0, canvas.width, canvas.height);
-            //     // ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-
-            //     const imageAspectRatio = imageElement.width / imageElement.height;
-            //     const canvasAspectRatio = canvas.width / canvas.height;
-            //     let drawWidth = canvas.width;
-            //     let drawHeight = canvas.height;
-
-            //     // Maintain the original aspect ratio of the image.
-            //     if (imageAspectRatio > canvasAspectRatio) {
-            //         drawHeight = canvas.width / imageAspectRatio;
-            //     } else {
-            //         drawWidth = canvas.height * imageAspectRatio;
-            //     }
-
-            //     const ctx = canvas.getContext('2d');
-            //     canvas.style.display = 'block';
-            //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            //     // Draw the image at the center of the canvas, maintaining its aspect ratio.
-            //     // const dx = (canvas.width - drawWidth) / 2;
-            //     // const dy = (canvas.height - drawHeight) / 2;
-            //     const dx = 0
-            //     const dy = 0
-            //     ctx.drawImage(imageElement, dx, dy, drawWidth, drawHeight);
-
-            //     if (cropper) {
-            //         cropper.destroy();
-            //     }
-            //     cropper = new Cropper(canvas, {
-            //         // aspectRatio: 1,  // Add aspect ratio (change the value as per your requirement)
-            //         autoCropArea: 1, // Sets crop box to 100% of the image area
-            //         dragMode: 'move',
-            //         cropBoxResizable: true,
-            //         cropBoxMovable: true,
-            //         ready: function () {
-            //             cropper.setCropBoxData({
-            //                 // left: dx,
-            //                 // top: dy,
-            //                 width: drawWidth,
-            //                 height: drawHeight
-            //             });
-            //         }
-            //     });
-            //     buttonContainer.style.display = 'block';
-
-            //     container.querySelector('#rotateClockwise').addEventListener('click', function() {
-            //         cropper.rotate(90);
-            //     });
-
-            //     container.querySelector('#rotateCounterClockwise').addEventListener('click', function() {
-            //         cropper.rotate(-90);
-            //     });
-            // }
-
             function start(imageElement, index) {
                 currentUnsavedIndex = index;
                 const ctx = canvas.getContext('2d');
