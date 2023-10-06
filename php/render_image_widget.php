@@ -467,62 +467,62 @@ function render_image_widget($config)
 
 
 
-            // function saveImage() {
-            //     if (!cropper) {
-            //         console.error("Error: Cropper not initialized.");
-            //         return;
-            //     }
-            //     console.log('original WIDTH: ' + originalWidth);
-            //     console.log('original HEIGHT: ' + originalHeight);
-            //     const croppedCanvas = cropper.getCroppedCanvas({
-            //         width: originalWidth,
-            //         height: originalHeight
-            //     });
+            function saveImage() {
+                if (!cropper) {
+                    console.error("Error: Cropper not initialized.");
+                    return;
+                }
+                console.log('original WIDTH: ' + originalWidth);
+                console.log('original HEIGHT: ' + originalHeight);
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    width: originalWidth,
+                    height: originalHeight
+                });
 
-            //     if (!croppedCanvas) {
-            //         console.error("Error: croppedCanvas is null");
-            //         return;
-            //     }
+                if (!croppedCanvas) {
+                    console.error("Error: croppedCanvas is null");
+                    return;
+                }
 
-            //     croppedCanvas.toBlob(function(blob) {
-            //         const thumbnail = document.createElement('img');
-            //         thumbnail.src = croppedCanvas.toDataURL();
-            //         thumbnail.width = 100;
-            //         thumbnail.dataset.index = savedImages.length;
+                croppedCanvas.toBlob(function(blob) {
+                    const thumbnail = document.createElement('img');
+                    thumbnail.src = croppedCanvas.toDataURL();
+                    thumbnail.width = 100;
+                    thumbnail.dataset.index = savedImages.length;
 
-            //         thumbnail.addEventListener('click', function() {
-            //             const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-            //             const fullQualityImageSrc = savedFullImages[index];
-            //             currentSavedIndex = index; // Update the currentSavedIndex
-            //             const img = new Image();
-            //             img.src = fullQualityImageSrc;
+                    thumbnail.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                        const fullQualityImageSrc = savedFullImages[index];
+                        currentSavedIndex = index; // Update the currentSavedIndex
+                        const img = new Image();
+                        img.src = fullQualityImageSrc;
                         
-            //             img.onload = function() {
-            //                 console.log('img ON THUMb CLICK width: ' + img.width);
-            //                 console.log('img height: ' + img.height);
-            //                 start(img);
-            //             };
-            //         });
+                        img.onload = function() {
+                            console.log('img ON THUMb CLICK width: ' + img.width);
+                            console.log('img height: ' + img.height);
+                            start(img);
+                        };
+                    });
 
-            //         savedImages.push(blob);
-            //         toggleVisibility();
-            //         savedFullImages.push(croppedCanvas.toDataURL());
-            //         container.querySelector('#thumbnails').appendChild(thumbnail);
+                    savedImages.push(blob);
+                    toggleVisibility();
+                    savedFullImages.push(croppedCanvas.toDataURL());
+                    container.querySelector('#thumbnails').appendChild(thumbnail);
 
 
-            //         if (currentUnsavedIndex !== null) {
-            //             unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            //             renderUnsavedThumbnails();
-            //         }
-            //         currentUnsavedIndex = null;
-            //     }, 'image/jpeg', 1);
+                    if (currentUnsavedIndex !== null) {
+                        unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                        renderUnsavedThumbnails();
+                    }
+                    currentUnsavedIndex = null;
+                }, 'image/jpeg', 1);
 
-            //     cropper.destroy();
-            //     buttonContainer.style.display = 'none';
-            //     canvas.style.visibility = 'hidden';
-            //     downloadBtn.style.display = 'block';
-            //     imageInput.value = '';
-            // }
+                cropper.destroy();
+                buttonContainer.style.display = 'none';
+                canvas.style.visibility = 'hidden';
+                downloadBtn.style.display = 'block';
+                imageInput.value = '';
+            }
 
             // function saveImage() {
             //     if (!cropper) {
@@ -564,90 +564,90 @@ function render_image_widget($config)
             //     downloadBtn.style.display = 'block';
             // }
 
-            function saveImage() {
-                if (!cropper) {
-                    console.error("Error: Cropper not initialized.");
-                    return;
-                }
+            // function saveImage() {
+            //     if (!cropper) {
+            //         console.error("Error: Cropper not initialized.");
+            //         return;
+            //     }
 
-                // Assuming imageInput is your file input element
-                const imageInput = container.querySelector('#image');
+            //     // Assuming imageInput is your file input element
+            //     const imageInput = container.querySelector('#image');
 
-                // Get the selected image index from a variable, let's call it selectedImageIndex
-                if (selectedImageIndex === null || selectedImageIndex < 0 || selectedImageIndex >= unsavedThumbnails.length) {
-                    console.error("Error: No image selected.");
-                    return;
-                }
-                console.log('SELECTED IMAGE INDEX: ', selectedImageIndex);
-                console.log('UNSAVED THUMBS: ', unsavedThumbnails)
-                console.log('SELECTED IMAGES: ', selectedImages)
-                // Get the original image corresponding to the selected index
-                let originalImage = unsavedThumbnails[selectedImageIndex];
-                if (!originalImage) {
-                    originalImage = selectedImages[selectedImageIndex];
-                }
-                if (!originalImage) {
-                    window.alert('previously saved images cannot be saved again');
-                    console.error("Error: No image selected.");
-                    return;
-                }
+            //     // Get the selected image index from a variable, let's call it selectedImageIndex
+            //     if (selectedImageIndex === null || selectedImageIndex < 0 || selectedImageIndex >= unsavedThumbnails.length) {
+            //         console.error("Error: No image selected.");
+            //         return;
+            //     }
+            //     console.log('SELECTED IMAGE INDEX: ', selectedImageIndex);
+            //     console.log('UNSAVED THUMBS: ', unsavedThumbnails)
+            //     console.log('SELECTED IMAGES: ', selectedImages)
+            //     // Get the original image corresponding to the selected index
+            //     let originalImage = unsavedThumbnails[selectedImageIndex];
+            //     if (!originalImage) {
+            //         originalImage = selectedImages[selectedImageIndex];
+            //     }
+            //     if (!originalImage) {
+            //         window.alert('previously saved images cannot be saved again');
+            //         console.error("Error: No image selected.");
+            //         return;
+            //     }
 
-                // Create a canvas element and draw the original image on it
-                const canvas = document.createElement('canvas');
-                canvas.width = originalImage.naturalWidth;
-                canvas.height = originalImage.naturalHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(originalImage, 0, 0);
+            //     // Create a canvas element and draw the original image on it
+            //     const canvas = document.createElement('canvas');
+            //     canvas.width = originalImage.naturalWidth;
+            //     canvas.height = originalImage.naturalHeight;
+            //     const ctx = canvas.getContext('2d');
+            //     ctx.drawImage(originalImage, 0, 0);
 
-                // Convert the canvas content to a blob and create a data URL
-                canvas.toBlob(function (blob) {
-                    if (!blob) {
-                        console.error("Error: Failed to create a blob.");
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = function () {
-                        const thumbnail = document.createElement('img');
-                        thumbnail.src = reader.result;
-                        thumbnail.width = 100;
-                        thumbnail.dataset.index = savedImages.length;
+            //     // Convert the canvas content to a blob and create a data URL
+            //     canvas.toBlob(function (blob) {
+            //         if (!blob) {
+            //             console.error("Error: Failed to create a blob.");
+            //             return;
+            //         }
+            //         const reader = new FileReader();
+            //         reader.onload = function () {
+            //             const thumbnail = document.createElement('img');
+            //             thumbnail.src = reader.result;
+            //             thumbnail.width = 100;
+            //             thumbnail.dataset.index = savedImages.length;
 
-                        thumbnail.addEventListener('click', function () {
-                            const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-                            const fullQualityImageSrc = savedFullImages[index];
-                            currentSavedIndex = index; // Update the currentSavedIndex
-                            const img = new Image();
-                            img.src = fullQualityImageSrc;
+            //             thumbnail.addEventListener('click', function () {
+            //                 const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+            //                 const fullQualityImageSrc = savedFullImages[index];
+            //                 currentSavedIndex = index; // Update the currentSavedIndex
+            //                 const img = new Image();
+            //                 img.src = fullQualityImageSrc;
 
-                            img.onload = function () {
-                                start(img);
-                            };
-                        });
+            //                 img.onload = function () {
+            //                     start(img);
+            //                 };
+            //             });
 
-                        savedImages.push(blob);
-                        toggleVisibility();
-                        savedFullImages.push(reader.result);
-                        container.querySelector('#thumbnails').appendChild(thumbnail);
-                        console.log('CURRENT UNSAVCE INDEX: ', currentUnsavedIndex)
-                        if (currentUnsavedIndex !== null) {
-                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                            renderUnsavedThumbnails();
-                        }
-                        currentUnsavedIndex = null;
-                    };
-                    reader.readAsDataURL(blob);
-                }, 'image/jpeg', 1);
+            //             savedImages.push(blob);
+            //             toggleVisibility();
+            //             savedFullImages.push(reader.result);
+            //             container.querySelector('#thumbnails').appendChild(thumbnail);
+            //             console.log('CURRENT UNSAVCE INDEX: ', currentUnsavedIndex)
+            //             if (currentUnsavedIndex !== null) {
+            //                 unsavedThumbnails.splice(currentUnsavedIndex, 1);
+            //                 renderUnsavedThumbnails();
+            //             }
+            //             currentUnsavedIndex = null;
+            //         };
+            //         reader.readAsDataURL(blob);
+            //     }, 'image/jpeg', 1);
 
-                cropper.destroy();
-                buttonContainer.style.display = 'none';
-                let currentCanvas = container.querySelector('#canvas');
-                canvas.style.visibility = 'hidden';
-                currentCanvas.style.visibility = 'hidden';
-                console.log('CANVAS: ', canvas);
-                console.log('canvas style visibility: ', canvas.style.visibility);
-                downloadBtn.style.display = 'block';
-                imageInput.value = '';
-            }
+            //     cropper.destroy();
+            //     buttonContainer.style.display = 'none';
+            //     let currentCanvas = container.querySelector('#canvas');
+            //     canvas.style.visibility = 'hidden';
+            //     currentCanvas.style.visibility = 'hidden';
+            //     console.log('CANVAS: ', canvas);
+            //     console.log('canvas style visibility: ', canvas.style.visibility);
+            //     downloadBtn.style.display = 'block';
+            //     imageInput.value = '';
+            // }
 
 
 
