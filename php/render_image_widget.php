@@ -120,6 +120,8 @@ function render_image_widget($config)
 
             let selectedImages = []; // An array to store selected images
             let selectedImageIndex = null
+            let originalImage = null; // Declare this at the top of your script
+
 
             // DOM Elements
             const cropBtn = container.querySelector('#crop');
@@ -199,6 +201,7 @@ function render_image_widget($config)
 
             function start(imageElement, index) {
                 currentUnsavedIndex = index;
+                originalImage = imageElement;  // Set the original image
                 selectedImageIndex = index;
                 const ctx = canvas.getContext('2d');
                 // canvas.width = imageElement.naturalWidth;
@@ -288,69 +291,147 @@ function render_image_widget($config)
                 imageInput.value = '';
             }
 
+            // function cropAndSave() {
+            //     // Check for cropper initialization
+            //     if (!cropper) {
+            //         console.log("Error: Cropper not initialized.");
+            //         return;
+            //     }
+            //     if (cropper) {
+
+            //         // Get the cropping box dimensions
+            //         const cropData = cropper.getData();
+            //         const cropWidth = cropData.width;
+            //         const cropHeight = cropData.height;
+
+            //         // Calculate new dimensions while keeping the original aspect ratio
+            //         const newWidth = cropWidth;
+            //         const newHeight = cropWidth / aspectRatio;
+            //         const croppedCanvas = cropper.getCroppedCanvas({
+            //             width: newWidth,
+            //             height: newHeight,
+            //             imageSmoothingEnabled: false,
+            //             imageSmoothingQuality: 'high',
+            //         });
+            //         if (!croppedCanvas) {
+            //             console.log("Error: Cropped canvas is null. Make sure crop box is set.");
+            //             return;
+            //         }
+            //         croppedCanvas.toBlob(function(blob) {
+            //             const thumbnail = document.createElement('img');
+            //             thumbnail.src = croppedCanvas.toDataURL();
+            //             thumbnail.width = 100;
+
+            //             // Change 1: Assign index as data attribute
+            //             const index = savedImages.length;
+            //             thumbnail.dataset.index = index;
+
+            //             thumbnail.addEventListener('click', function() {
+            //                 const fullQualityImageSrc = savedFullImages[index];
+            //                 const img = new Image();
+            //                 currentSavedIndex = index; // Update the currentSavedIndex
+            //                 img.src = fullQualityImageSrc;
+            //                 img.onload = function() {
+            //                     start(img);
+            //                 };
+            //             });
+            //             savedImages.push(blob);
+            //             toggleVisibility();
+            //             savedFullImages.push(croppedCanvas.toDataURL());
+            //             container.querySelector('#thumbnails').appendChild(thumbnail);
+            //         }, 'image/jpeg', 1);
+
+            //         if (currentUnsavedIndex !== null) {
+            //             unsavedThumbnails.splice(currentUnsavedIndex, 1);
+            //             renderUnsavedThumbnails();
+            //         }
+            //         currentUnsavedIndex = null;
+
+            //         cropper.destroy();
+            //         buttonContainer.style.display = 'none';
+            //         canvas.style.visibility = 'hidden';
+            //         downloadBtn.style.display = 'block';
+            //         imageInput.value = '';
+            //     }
+            // }
+
             function cropAndSave() {
-                // Check for cropper initialization
-                if (!cropper) {
-                    console.log("Error: Cropper not initialized.");
+                if (!cropper || !originalImage) {
+                    console.log("Error: Cropper not initialized or original image not set.");
                     return;
                 }
-                if (cropper) {
 
-                    // Get the cropping box dimensions
-                    const cropData = cropper.getData();
-                    const cropWidth = cropData.width;
-                    const cropHeight = cropData.height;
+                // Get the cropping box dimensions from the cropper
+                const cropData = cropper.getData();
+                
+                // Calculate the scaling factors
+                const scaleX = originalImage.naturalWidth / canvas.width;
+                const scaleY = originalImage.naturalHeight / canvas.height;
 
-                    // Calculate new dimensions while keeping the original aspect ratio
-                    const newWidth = cropWidth;
-                    const newHeight = cropWidth / aspectRatio;
-                    const croppedCanvas = cropper.getCroppedCanvas({
-                        width: newWidth,
-                        height: newHeight,
-                        imageSmoothingEnabled: false,
-                        imageSmoothingQuality: 'high',
-                    });
-                    if (!croppedCanvas) {
-                        console.log("Error: Cropped canvas is null. Make sure crop box is set.");
-                        return;
-                    }
-                    croppedCanvas.toBlob(function(blob) {
-                        const thumbnail = document.createElement('img');
-                        thumbnail.src = croppedCanvas.toDataURL();
+                // Create a new canvas for the final cropped image
+                const croppedCanvas = document.createElement('canvas');
+                croppedCanvas.width = cropData.width * scaleX;
+                croppedCanvas.height = cropData.height * scaleY;
+
+                const ctx = croppedCanvas.getContext('2d');
+
+                // Calculate the exact coordinates, taking into account the scaling factors
+                const sourceX = Math.round(cropData.x * scaleX);
+                const sourceY = Math.round(cropData.y * scaleY);
+                const sourceWidth = Math.round(cropData.width * scaleX);
+                const sourceHeight = Math.round(cropData.height * scaleY);
+
+                // Draw the scaled cropped area onto the new canvas
+                ctx.drawImage(
+                    originalImage, 
+                    sourceX, sourceY,
+                    sourceWidth, sourceHeight,
+                    0, 0, 
+                    sourceWidth, sourceHeight
+                );
+
+                croppedCanvas.toBlob(function(blob) {
+                    const thumbnail = document.createElement('img');
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        thumbnail.src = reader.result;
                         thumbnail.width = 100;
+                        thumbnail.maxHeight = 100;
+                        thumbnail.dataset.index = savedImages.length;
 
-                        // Change 1: Assign index as data attribute
-                        const index = savedImages.length;
-                        thumbnail.dataset.index = index;
-
-                        thumbnail.addEventListener('click', function() {
+                        thumbnail.addEventListener('click', function () {
+                            const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                             const fullQualityImageSrc = savedFullImages[index];
-                            const img = new Image();
                             currentSavedIndex = index; // Update the currentSavedIndex
+                            const img = new Image();
                             img.src = fullQualityImageSrc;
-                            img.onload = function() {
+
+                            img.onload = function () {
                                 start(img);
                             };
                         });
+
                         savedImages.push(blob);
                         toggleVisibility();
-                        savedFullImages.push(croppedCanvas.toDataURL());
+                        savedFullImages.push(reader.result);
                         container.querySelector('#thumbnails').appendChild(thumbnail);
-                    }, 'image/jpeg', 1);
 
-                    if (currentUnsavedIndex !== null) {
-                        unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                        renderUnsavedThumbnails();
-                    }
-                    currentUnsavedIndex = null;
+                        if (currentUnsavedIndex !== null) {
+                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                            renderUnsavedThumbnails();
+                        }
+                        currentUnsavedIndex = null;
+                    };
+                    reader.readAsDataURL(blob);
+                }, 'image/jpeg', 1);
 
-                    cropper.destroy();
-                    buttonContainer.style.display = 'none';
-                    canvas.style.visibility = 'hidden';
-                    downloadBtn.style.display = 'block';
-                    imageInput.value = '';
-                }
+                cropper.destroy();
+                buttonContainer.style.display = 'none';
+                canvas.style.visibility = 'hidden';
+                downloadBtn.style.display = 'block';
+                imageInput.value = '';
             }
+
 
 
             // function saveImage() {
@@ -688,32 +769,37 @@ function render_image_widget($config)
             }
    
 
+
             function downloadImages() {
-                const imagePromises = savedImages.map(image => {
+                const imagePromises = savedImages.map(blob => {
                     return new Promise((resolve, reject) => {
                         const canvas = document.createElement('canvas');
-                        canvas.width = image.naturalWidth;
-                        canvas.height = image.naturalHeight;
-                        const ctx = canvas.getContext('2d');
-
-                        console.log("Type of image:", typeof image);
-                        console.log("Value of image:", image);
-                        ctx.drawImage(image, 0, 0);
-                        canvas.toBlob(
-                            blob => {
-                                if (!blob) {
-                                    reject(new Error("Failed to create a blob."));
-                                    return;
-                                }
-                                const reader = new FileReader();
-                                reader.onload = () => {
-                                    resolve(reader.result);
-                                };
-                                reader.readAsDataURL(blob);
-                            },
-                            'image/jpeg',
-                            1
-                        );
+                        const img = new Image();
+                        img.onload = () => {
+                            canvas.width = img.naturalWidth;
+                            canvas.height = img.naturalHeight;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            canvas.toBlob(
+                                blob => {
+                                    if (!blob) {
+                                        reject(new Error("Failed to create a blob."));
+                                        return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = () => {
+                                        resolve(reader.result);
+                                    };
+                                    reader.readAsDataURL(blob);
+                                },
+                                'image/jpeg',
+                                1
+                            );
+                        };
+                        img.onerror = () => {
+                            reject(new Error("Failed to load image."));
+                        };
+                        img.src = URL.createObjectURL(blob);
                     });
                 });
 
