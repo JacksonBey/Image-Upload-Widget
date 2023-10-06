@@ -120,7 +120,9 @@ function render_image_widget($config)
 
             let selectedImages = []; // An array to store selected images
             let selectedImageIndex = null
-            let originalImage = null; // Declare this at the top of your script
+            let originalImage = null; 
+            let globalDx = 0;
+            let globalDy = 0;
 
 
             // DOM Elements
@@ -204,65 +206,82 @@ function render_image_widget($config)
                 originalImage = imageElement;  // Set the original image
                 selectedImageIndex = index;
                 const ctx = canvas.getContext('2d');
-                // canvas.width = imageElement.naturalWidth;
-                // canvas.height = imageElement.naturalHeight;
+
+                // Set canvas dimensions to match the original image dimensions
+                canvas.width = imageElement.naturalWidth;
+                canvas.height = imageElement.naturalHeight;
+
+                // Clear canvas and draw the original image
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const imageAspectRatio = imageElement.naturalWidth / imageElement.naturalHeight;
-                const canvasAspectRatio = canvas.width / canvas.height;
-                
-                let drawWidth, drawHeight;
-                if (imageAspectRatio > canvasAspectRatio) {
-                    drawWidth = canvas.width;
-                    drawHeight = canvas.width / imageAspectRatio;
-                } else {
-                    drawHeight = canvas.height;
-                    drawWidth = canvas.height * imageAspectRatio;
-                }
+                ctx.drawImage(imageElement, 0, 0, imageElement.naturalWidth, imageElement.naturalHeight);
 
-                const dx = (canvas.width - drawWidth) / 2;
-                const dy = (canvas.height - drawHeight) / 2;
-
-                ctx.drawImage(imageElement, dx, dy, drawWidth, drawHeight);
-                buttonContainer.style.display = 'block';
-
+                // Initialize Cropper.js
                 if (cropper) {
                     cropper.destroy();
                 }
 
-                // Calculate the centers
-                const imageCenterX = dx + (drawWidth / 2);
-                const imageCenterY = dy + (drawHeight / 2);
+                // let drawWidth, drawHeight;
+                // if (imageAspectRatio > canvasAspectRatio) {
+                //     drawWidth = canvas.width;
+                //     drawHeight = canvas.width / imageAspectRatio;
+                // } else {
+                //     drawHeight = canvas.height;
+                //     drawWidth = canvas.height * imageAspectRatio;
+                // }
+
                 cropper = new Cropper(canvas, {
                     autoCropArea: 1,
                     dragMode: 'move',
                     cropBoxResizable: true,
                     cropBoxMovable: true,
                     ready: function () {
-                        const cropBoxWidth = drawWidth; 
-                        const cropBoxHeight = drawHeight; 
-                        // const cropBoxWidth = (originalWidth > originalHeight) ? canvas.width : (canvas.width * (originalWidth / originalHeight));
-                        // const cropBoxHeight = (originalWidth > originalHeight) ? (canvas.height * (originalHeight / originalWidth)) : canvas.height;
+                        // const cropBoxWidth = drawWidth; 
+                        // const cropBoxHeight = drawHeight; 
+                        // // const cropBoxWidth = (originalWidth > originalHeight) ? canvas.width : (canvas.width * (originalWidth / originalHeight));
+                        // // const cropBoxHeight = (originalWidth > originalHeight) ? (canvas.height * (originalHeight / originalWidth)) : canvas.height;
                         
-                        // Existing center of the crop box, if it's already been set
-                        const existingCropBoxData = cropper.getCropBoxData();
-                        const existingCropBoxCenterX = existingCropBoxData.left + (existingCropBoxData.width / 2);
-                        const existingCropBoxCenterY = existingCropBoxData.top + (existingCropBoxData.height / 2);
+                        // // Existing center of the crop box, if it's already been set
+                        // const existingCropBoxData = cropper.getCropBoxData();
+                        // const existingCropBoxCenterX = existingCropBoxData.left + (existingCropBoxData.width / 2);
+                        // const existingCropBoxCenterY = existingCropBoxData.top + (existingCropBoxData.height / 2);
 
-                        // Intended new center of the crop box (which should be the same as the old center)
-                        const cropBoxCenterX = existingCropBoxCenterX; 
-                        const cropBoxCenterY = existingCropBoxCenterY; 
+                        // // Intended new center of the crop box (which should be the same as the old center)
+                        // const cropBoxCenterX = existingCropBoxCenterX; 
+                        // const cropBoxCenterY = existingCropBoxCenterY; 
 
-                        // Calculate new top-left corner based on the new center
-                        const cropBoxLeft = cropBoxCenterX - (cropBoxWidth / 2);
-                        const cropBoxTop = cropBoxCenterY - (cropBoxHeight / 2);
+                        // // Calculate new top-left corner based on the new center
+                        // const cropBoxLeft = cropBoxCenterX - (cropBoxWidth / 2);
+                        // const cropBoxTop = cropBoxCenterY - (cropBoxHeight / 2);
                         
-                        cropper.setCropBoxData({
-                            left: cropBoxLeft,
-                            top: cropBoxTop,
-                            width: cropBoxWidth,
-                            height: cropBoxHeight
-                        });
+                        // cropper.setCropBoxData({
+                        //     left: cropBoxLeft,
+                        //     top: cropBoxTop,
+                        //     width: cropBoxWidth,
+                        //     height: cropBoxHeight
+                        // });
+
+
+                            // Set your desired dimensions for the crop box
+                        // const cropBoxWidth = originalImage.naturalWidth;  
+                        // const cropBoxHeight = originalImage.naturalHeight;
+
+                        buttonContainer.style.display = 'block';
+
+                        // // Calculate the center of the canvas
+                        // const canvasCenterX = canvas.width / 2;  
+                        // const canvasCenterY = canvas.height / 2;
+
+                        // // Calculate new top-left corner based on the center
+                        // const cropBoxLeft = canvasCenterX - (cropBoxWidth / 2);
+                        // const cropBoxTop = canvasCenterY - (cropBoxHeight / 2);
+
+                        // // Apply the crop box dimensions
+                        // cropper.setCropBoxData({
+                        //     left: cropBoxLeft,
+                        //     top: cropBoxTop,
+                        //     // width: cropBoxWidth,
+                        //     // height: cropBoxHeight
+                        // });
                     }
 
                 });
@@ -361,33 +380,47 @@ function render_image_widget($config)
                     return;
                 }
 
-                // Get the cropping box dimensions from the cropper
                 const cropData = cropper.getData();
-                
-                // Calculate the scaling factors
                 const scaleX = originalImage.naturalWidth / canvas.width;
                 const scaleY = originalImage.naturalHeight / canvas.height;
 
-                // Create a new canvas for the final cropped image
+                const sourceX = Math.round((cropData.x + globalDx) * scaleX);
+                const sourceY = Math.round((cropData.y + globalDy) * scaleY);
+                const correctedSourceX = Math.round((cropData.x - globalDx) * scaleX);
+                const correctedSourceY = Math.round((cropData.y - globalDy) * scaleY);
+
+                const maxSourceX = originalImage.naturalWidth;
+                const maxSourceY = originalImage.naturalHeight;
+
+                let sourceWidth = Math.round(cropData.width * scaleX);
+                let sourceHeight = Math.round(cropData.height * scaleY);
+
+                if (correctedSourceX + sourceWidth > maxSourceX) {
+                    sourceWidth = maxSourceX - correctedSourceX;
+                }
+
+                if (correctedSourceY + sourceHeight > maxSourceY) {
+                    sourceHeight = maxSourceY - correctedSourceY;
+                }
+
+
                 const croppedCanvas = document.createElement('canvas');
-                croppedCanvas.width = cropData.width * scaleX;
-                croppedCanvas.height = cropData.height * scaleY;
+                croppedCanvas.width = originalImage.naturalWidth;
+                croppedCanvas.height = originalImage.naturalHeight;
 
                 const ctx = croppedCanvas.getContext('2d');
 
-                // Calculate the exact coordinates, taking into account the scaling factors
-                const sourceX = Math.round(cropData.x * scaleX);
-                const sourceY = Math.round(cropData.y * scaleY);
-                const sourceWidth = Math.round(cropData.width * scaleX);
-                const sourceHeight = Math.round(cropData.height * scaleY);
+                console.log('sourceX: ', sourceX);
+                console.log('sourceY: ', sourceY);
+                console.log('sourceWidth: ', sourceWidth);
+                console.log('sourceHeight: ', sourceHeight);
+                console.log('globalDx: ', globalDx);
+                console.log('globalDy: ', globalDy);
 
-                // Draw the scaled cropped area onto the new canvas
                 ctx.drawImage(
-                    originalImage, 
-                    sourceX, sourceY,
-                    sourceWidth, sourceHeight,
-                    0, 0, 
-                    sourceWidth, sourceHeight
+                    originalImage,
+                    sourceX, sourceY, sourceWidth, sourceHeight,
+                    0, 0, originalImage.naturalWidth, originalImage.naturalHeight
                 );
 
                 croppedCanvas.toBlob(function(blob) {
