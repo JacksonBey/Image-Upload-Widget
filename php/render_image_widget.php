@@ -77,6 +77,7 @@ function render_image_widget($config)
             function validateImage(imageElement) {
                 const width = imageElement.width;
                 const height = imageElement.height;
+                
                 if (savedImages.length >= max_photos) {
                     alert('Maximum number of photos reached.');
                     return {
@@ -116,6 +117,9 @@ function render_image_widget($config)
             let currentSavedIndex = null;
             let originalWidth, originalHeight;
             let hasRotateEventAdded = false;
+
+            let selectedImages = []; // An array to store selected images
+            let selectedImageIndex = null
 
             // DOM Elements
             const cropBtn = container.querySelector('#crop');
@@ -195,7 +199,10 @@ function render_image_widget($config)
 
             function start(imageElement, index) {
                 currentUnsavedIndex = index;
+                selectedImageIndex = index;
                 const ctx = canvas.getContext('2d');
+                // canvas.width = imageElement.naturalWidth;
+                // canvas.height = imageElement.naturalHeight;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 const imageAspectRatio = imageElement.naturalWidth / imageElement.naturalHeight;
@@ -231,6 +238,8 @@ function render_image_widget($config)
                     ready: function () {
                         const cropBoxWidth = drawWidth; 
                         const cropBoxHeight = drawHeight; 
+                        // const cropBoxWidth = (originalWidth > originalHeight) ? canvas.width : (canvas.width * (originalWidth / originalHeight));
+                        // const cropBoxHeight = (originalWidth > originalHeight) ? (canvas.height * (originalHeight / originalWidth)) : canvas.height;
                         
                         // Existing center of the crop box, if it's already been set
                         const existingCropBoxData = cropper.getCropBoxData();
@@ -344,65 +353,228 @@ function render_image_widget($config)
             }
 
 
+            // function saveImage() {
+            //     if (!cropper) {
+            //         console.error("Error: Cropper not initialized.");
+            //         return;
+            //     }
+            //     console.log('original WIDTH: ' + originalWidth);
+            //     console.log('original HEIGHT: ' + originalHeight);
+            //     const croppedCanvas = cropper.getCroppedCanvas({
+            //         width: originalWidth,
+            //         height: originalHeight
+            //     });
+
+            //     if (!croppedCanvas) {
+            //         console.error("Error: croppedCanvas is null");
+            //         return;
+            //     }
+
+            //     croppedCanvas.toBlob(function(blob) {
+            //         const thumbnail = document.createElement('img');
+            //         thumbnail.src = croppedCanvas.toDataURL();
+            //         thumbnail.width = 100;
+            //         thumbnail.dataset.index = savedImages.length;
+
+            //         thumbnail.addEventListener('click', function() {
+            //             const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+            //             const fullQualityImageSrc = savedFullImages[index];
+            //             currentSavedIndex = index; // Update the currentSavedIndex
+            //             const img = new Image();
+            //             img.src = fullQualityImageSrc;
+                        
+            //             img.onload = function() {
+            //                 console.log('img ON THUMb CLICK width: ' + img.width);
+            //                 console.log('img height: ' + img.height);
+            //                 start(img);
+            //             };
+            //         });
+
+            //         savedImages.push(blob);
+            //         toggleVisibility();
+            //         savedFullImages.push(croppedCanvas.toDataURL());
+            //         container.querySelector('#thumbnails').appendChild(thumbnail);
+
+
+            //         if (currentUnsavedIndex !== null) {
+            //             unsavedThumbnails.splice(currentUnsavedIndex, 1);
+            //             renderUnsavedThumbnails();
+            //         }
+            //         currentUnsavedIndex = null;
+            //     }, 'image/jpeg', 1);
+
+            //     cropper.destroy();
+            //     buttonContainer.style.display = 'none';
+            //     canvas.style.visibility = 'hidden';
+            //     downloadBtn.style.display = 'block';
+            //     imageInput.value = '';
+            // }
+
+            // function saveImage() {
+            //     if (!cropper) {
+            //         console.error("Error: Cropper not initialized.");
+            //         return;
+            //     }
+
+            //     if (selectedImages.length === 0) {
+            //         console.error("Error: No image selected.");
+            //         return;
+            //     }
+
+            //     const originalImage = selectedImages[selectedImages.length - 1]; // Use the last selected image
+            //     const thumbnail = document.createElement('img');
+            //     thumbnail.src = originalImage.src;
+            //     thumbnail.width = 100;
+            //     thumbnail.dataset.index = savedImages.length;
+
+            //     thumbnail.addEventListener('click', function() {
+            //         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+            //         const fullQualityImage = selectedImages[index];
+            //         currentSavedIndex = index; // Update the currentSavedIndex
+            //         start(fullQualityImage, index);
+            //     });
+
+            //     savedImages.push(originalImage);
+            //     toggleVisibility();
+            //     container.querySelector('#thumbnails').appendChild(thumbnail);
+            //     console.log('CURRENT UNSAVED INDEX: ', currentUnsavedIndex);
+            //     if (currentUnsavedIndex !== null) {
+            //         unsavedThumbnails.splice(currentUnsavedIndex, 1);
+            //         renderUnsavedThumbnails();
+            //     }
+            //     currentUnsavedIndex = null;
+                
+            //     cropper.destroy();
+            //     buttonContainer.style.display = 'none';
+            //     canvas.style.visibility = 'hidden';
+            //     downloadBtn.style.display = 'block';
+            // }
+
             function saveImage() {
                 if (!cropper) {
                     console.error("Error: Cropper not initialized.");
                     return;
                 }
-                const croppedCanvas = cropper.getCroppedCanvas({
-                    width: originalWidth,
-                    height: originalHeight,
-                    imageSmoothingEnabled: false,
-                    imageSmoothingQuality: 'high',
-                });
 
-                if (!croppedCanvas) {
-                    console.error("Error: croppedCanvas is null");
+                // Assuming imageInput is your file input element
+                const imageInput = container.querySelector('#image');
+
+                // Get the selected image index from a variable, let's call it selectedImageIndex
+                if (selectedImageIndex === null || selectedImageIndex < 0 || selectedImageIndex >= unsavedThumbnails.length) {
+                    console.error("Error: No image selected.");
+                    return;
+                }
+                console.log('SELECTED IMAGE INDEX: ', selectedImageIndex);
+                console.log('UNSAVED THUMBS: ', unsavedThumbnails)
+                console.log('SELECTED IMAGES: ', selectedImages)
+                // Get the original image corresponding to the selected index
+                let originalImage = unsavedThumbnails[selectedImageIndex];
+                if (!originalImage) {
+                    originalImage = selectedImages[selectedImageIndex];
+                }
+                if (!originalImage) {
+                    window.alert('previously saved images cannot be saved again');
+                    console.error("Error: No image selected.");
                     return;
                 }
 
-                croppedCanvas.toBlob(function(blob) {
-                    const thumbnail = document.createElement('img');
-                    thumbnail.src = croppedCanvas.toDataURL();
-                    thumbnail.width = 100;
-                    thumbnail.dataset.index = savedImages.length;
+                // Create a canvas element and draw the original image on it
+                const canvas = document.createElement('canvas');
+                canvas.width = originalImage.naturalWidth;
+                canvas.height = originalImage.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(originalImage, 0, 0);
 
-                    thumbnail.addEventListener('click', function() {
-                        const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-                        const fullQualityImageSrc = savedFullImages[index];
-                        currentSavedIndex = index; // Update the currentSavedIndex
-                        const img = new Image();
-                        img.src = fullQualityImageSrc;
-                        img.onload = function() {
-                            start(img);
-                        };
-                    });
-
-                    savedImages.push(blob);
-                    toggleVisibility();
-                    savedFullImages.push(croppedCanvas.toDataURL());
-                    container.querySelector('#thumbnails').appendChild(thumbnail);
-
-
-                    if (currentUnsavedIndex !== null) {
-                        unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                        renderUnsavedThumbnails();
+                // Convert the canvas content to a blob and create a data URL
+                canvas.toBlob(function (blob) {
+                    if (!blob) {
+                        console.error("Error: Failed to create a blob.");
+                        return;
                     }
-                    currentUnsavedIndex = null;
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        const thumbnail = document.createElement('img');
+                        thumbnail.src = reader.result;
+                        thumbnail.width = 100;
+                        thumbnail.dataset.index = savedImages.length;
+
+                        thumbnail.addEventListener('click', function () {
+                            const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                            const fullQualityImageSrc = savedFullImages[index];
+                            currentSavedIndex = index; // Update the currentSavedIndex
+                            const img = new Image();
+                            img.src = fullQualityImageSrc;
+
+                            img.onload = function () {
+                                start(img);
+                            };
+                        });
+
+                        savedImages.push(blob);
+                        toggleVisibility();
+                        savedFullImages.push(reader.result);
+                        container.querySelector('#thumbnails').appendChild(thumbnail);
+                        console.log('CURRENT UNSAVCE INDEX: ', currentUnsavedIndex)
+                        if (currentUnsavedIndex !== null) {
+                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                            renderUnsavedThumbnails();
+                        }
+                        currentUnsavedIndex = null;
+                    };
+                    reader.readAsDataURL(blob);
                 }, 'image/jpeg', 1);
 
                 cropper.destroy();
                 buttonContainer.style.display = 'none';
+                let currentCanvas = container.querySelector('#canvas');
                 canvas.style.visibility = 'hidden';
+                currentCanvas.style.visibility = 'hidden';
+                console.log('CANVAS: ', canvas);
+                console.log('canvas style visibility: ', canvas.style.visibility);
                 downloadBtn.style.display = 'block';
                 imageInput.value = '';
             }
+
+
+
+            // const onDrop = (e) => {
+            //     e.preventDefault();
+            //     const files = e.dataTransfer.files;
+            //     const filesArray = Array.from(files);
+            //     if (savedImages.length + filesArray.length > max_photos) {
+            //         alert('Maximum number of photos reached.');
+            //         return;
+            //     }
+            //     if (existingFilesCount >= max_photos) {
+            //         alert('Maximum number of photos reached.');
+            //         return;
+            //     }
+            //     Array.from(files).forEach(file => {
+            //         const reader = new FileReader();
+            //         reader.onload = function(e) {
+            //             const img = new Image();
+            //             img.src = e.target.result;
+            //             img.onload = function() {
+            //                 const validation = validateImage(img);
+            //                 if (!validation.isValid) {
+            //                     alert(validation.error);
+            //                     container.querySelector('#image').value = '';
+            //                     return;
+            //                 }
+            //                 unsavedThumbnails.push(img);
+            //                 renderUnsavedThumbnails();
+            //                 start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
+            //             };
+            //         };
+            //         reader.readAsDataURL(file);
+            //     });
+            // };
 
             const onDrop = (e) => {
                 e.preventDefault();
                 const files = e.dataTransfer.files;
                 const filesArray = Array.from(files);
-                if (savedImages.length + filesArray.length > max_photos) {
+                if (selectedImages.length + filesArray.length > max_photos) {
                     alert('Maximum number of photos reached.');
                     return;
                 }
@@ -410,6 +582,7 @@ function render_image_widget($config)
                     alert('Maximum number of photos reached.');
                     return;
                 }
+                
                 Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -419,35 +592,18 @@ function render_image_widget($config)
                             const validation = validateImage(img);
                             if (!validation.isValid) {
                                 alert(validation.error);
-                                container.querySelector('#image').value = '';
                                 return;
                             }
+                            selectedImages.push(img);
                             unsavedThumbnails.push(img);
                             renderUnsavedThumbnails();
-                            start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
+                            start(img, selectedImages.length - 1); // Auto-populate canvas
                         };
                     };
                     reader.readAsDataURL(file);
                 });
             };
 
-            function renderUnsavedThumbnails() {
-                const unsavedArea = container.querySelector('#unsaved-thumbnails');
-                unsavedArea.innerHTML = '';
-                unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
-                    const thumbnail = new Image();
-                    thumbnail.src = img.src;
-                    thumbnail.width = 100;
-                    thumbnail.dataset.index = index;
-                    thumbnail.style.border = '2px solid red'; // Red border for unsaved
-                    thumbnail.addEventListener('click', function() {
-                        const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
-                        start(originalImage, index); // Pass the actual original image object
-                    });
-                    unsavedArea.appendChild(thumbnail);
-                });
-                toggleVisibility();
-            }
 
             function onImageUpload(event) {
                 const files = event.target.files;
@@ -474,12 +630,32 @@ function render_image_widget($config)
                                 return;
                             }
                             unsavedThumbnails.push(img);
+                            selectedImages.push(img);
                             renderUnsavedThumbnails();
                             start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
                         };
                     };
                     reader.readAsDataURL(file);
                 });
+            }
+
+            
+            function renderUnsavedThumbnails() {
+                const unsavedArea = container.querySelector('#unsaved-thumbnails');
+                unsavedArea.innerHTML = '';
+                unsavedThumbnails.forEach((img, index) => { // 'img' is an image object
+                    const thumbnail = new Image();
+                    thumbnail.src = img.src;
+                    thumbnail.width = 100;
+                    thumbnail.dataset.index = index;
+                    thumbnail.style.border = '2px solid red'; // Red border for unsaved
+                    thumbnail.addEventListener('click', function() {
+                        const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
+                        start(originalImage, index); // Pass the actual original image object
+                    });
+                    unsavedArea.appendChild(thumbnail);
+                });
+                toggleVisibility();
             }
 
             function toggleSaveImageText() {
@@ -511,35 +687,57 @@ function render_image_widget($config)
                 }
             }
    
-            //send to server
+
             function downloadImages() {
-                Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = function() {
-                            resolve(reader.result);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    })))
+                const imagePromises = savedImages.map(image => {
+                    return new Promise((resolve, reject) => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = image.naturalWidth;
+                        canvas.height = image.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+
+                        console.log("Type of image:", typeof image);
+                        console.log("Value of image:", image);
+                        ctx.drawImage(image, 0, 0);
+                        canvas.toBlob(
+                            blob => {
+                                if (!blob) {
+                                    reject(new Error("Failed to create a blob."));
+                                    return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    resolve(reader.result);
+                                };
+                                reader.readAsDataURL(blob);
+                            },
+                            'image/jpeg',
+                            1
+                        );
+                    });
+                });
+
+                Promise.all(imagePromises)
                     .then(dataUrls => {
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', 'download_images.php', true);
                         xhr.setRequestHeader('Content-Type', 'application/json');
-                        xhr.onreadystatechange = function() { // Added this block for handling response
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                const response = JSON.parse(xhr.responseText);
-                                if (response.status === 'success') {
-                                    alert('Images successfully uploaded.'); // Success message here
-                                    container.querySelector('#thumbnails').innerHTML = '';
-                                    // buttonContainer.style.display = 'none';
-                                    downloadBtn.style.display = 'none';
-                                    const imagesText = container.querySelector('#images-text');
-
-                                    imagesText.style.display = 'none';
-
-                                    savedImages = [];
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4) {
+                                if (xhr.status === 200) {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.status === 'success') {
+                                        alert('Images successfully uploaded.'); // Success message here
+                                        container.querySelector('#thumbnails').innerHTML = '';
+                                        downloadBtn.style.display = 'none';
+                                        const imagesText = container.querySelector('#images-text');
+                                        imagesText.style.display = 'none';
+                                        savedImages = [];
+                                    } else {
+                                        alert('Upload failed: ' + response.status);
+                                    }
                                 } else {
-                                    alert('Upload failed: ' + response.status);
+                                    console.error('Failed to upload images. HTTP Status: ' + xhr.status);
                                 }
                             }
                         };
@@ -553,8 +751,52 @@ function render_image_widget($config)
                     .catch(error => {
                         console.error("Failed to convert blobs to data URLs: ", error);
                     });
-
             }
+
+            //send to server
+            // function downloadImages() {
+            //     Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
+            //             const reader = new FileReader();
+            //             reader.onloadend = function() {
+            //                 resolve(reader.result);
+            //             };
+            //             reader.onerror = reject;
+            //             reader.readAsDataURL(blob);
+            //         })))
+            //         .then(dataUrls => {
+            //             const xhr = new XMLHttpRequest();
+            //             xhr.open('POST', 'download_images.php', true);
+            //             xhr.setRequestHeader('Content-Type', 'application/json');
+            //             xhr.onreadystatechange = function() { // Added this block for handling response
+            //                 if (xhr.readyState === 4 && xhr.status === 200) {
+            //                     const response = JSON.parse(xhr.responseText);
+            //                     if (response.status === 'success') {
+            //                         alert('Images successfully uploaded.'); // Success message here
+            //                         container.querySelector('#thumbnails').innerHTML = '';
+            //                         // buttonContainer.style.display = 'none';
+            //                         downloadBtn.style.display = 'none';
+            //                         const imagesText = container.querySelector('#images-text');
+
+            //                         imagesText.style.display = 'none';
+
+            //                         savedImages = [];
+            //                     } else {
+            //                         alert('Upload failed: ' + response.status);
+            //                     }
+            //                 }
+            //             };
+            //             xhr.send(JSON.stringify({
+            //                 images: dataUrls,
+            //                 path: file_path,
+            //                 max_photos: max_photos,
+            //                 existing_files_count: existingFilesCount
+            //             }));
+            //         })
+            //         .catch(error => {
+            //             console.error("Failed to convert blobs to data URLs: ", error);
+            //         });
+
+            // }
 
             // save to local machine
             // function downloadImages() {

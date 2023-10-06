@@ -1,8 +1,8 @@
 <?php
 include 'render_image_widget.php';
 $config = [
-    'max_width' => 800,
-    'max_height' => 600,
+    'max_width' => 2000,
+    'max_height' => 2000,
     'min_width' => 100,
     'min_height' => 100,
     'max_photos' => 10,
