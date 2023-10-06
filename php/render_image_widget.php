@@ -220,68 +220,13 @@ function render_image_widget($config)
                     cropper.destroy();
                 }
 
-                // let drawWidth, drawHeight;
-                // if (imageAspectRatio > canvasAspectRatio) {
-                //     drawWidth = canvas.width;
-                //     drawHeight = canvas.width / imageAspectRatio;
-                // } else {
-                //     drawHeight = canvas.height;
-                //     drawWidth = canvas.height * imageAspectRatio;
-                // }
-
                 cropper = new Cropper(canvas, {
                     autoCropArea: 1,
                     dragMode: 'move',
                     cropBoxResizable: true,
                     cropBoxMovable: true,
                     ready: function () {
-                        // const cropBoxWidth = drawWidth; 
-                        // const cropBoxHeight = drawHeight; 
-                        // // const cropBoxWidth = (originalWidth > originalHeight) ? canvas.width : (canvas.width * (originalWidth / originalHeight));
-                        // // const cropBoxHeight = (originalWidth > originalHeight) ? (canvas.height * (originalHeight / originalWidth)) : canvas.height;
-                        
-                        // // Existing center of the crop box, if it's already been set
-                        // const existingCropBoxData = cropper.getCropBoxData();
-                        // const existingCropBoxCenterX = existingCropBoxData.left + (existingCropBoxData.width / 2);
-                        // const existingCropBoxCenterY = existingCropBoxData.top + (existingCropBoxData.height / 2);
-
-                        // // Intended new center of the crop box (which should be the same as the old center)
-                        // const cropBoxCenterX = existingCropBoxCenterX; 
-                        // const cropBoxCenterY = existingCropBoxCenterY; 
-
-                        // // Calculate new top-left corner based on the new center
-                        // const cropBoxLeft = cropBoxCenterX - (cropBoxWidth / 2);
-                        // const cropBoxTop = cropBoxCenterY - (cropBoxHeight / 2);
-                        
-                        // cropper.setCropBoxData({
-                        //     left: cropBoxLeft,
-                        //     top: cropBoxTop,
-                        //     width: cropBoxWidth,
-                        //     height: cropBoxHeight
-                        // });
-
-
-                            // Set your desired dimensions for the crop box
-                        // const cropBoxWidth = originalImage.naturalWidth;  
-                        // const cropBoxHeight = originalImage.naturalHeight;
-
                         buttonContainer.style.display = 'block';
-
-                        // // Calculate the center of the canvas
-                        // const canvasCenterX = canvas.width / 2;  
-                        // const canvasCenterY = canvas.height / 2;
-
-                        // // Calculate new top-left corner based on the center
-                        // const cropBoxLeft = canvasCenterX - (cropBoxWidth / 2);
-                        // const cropBoxTop = canvasCenterY - (cropBoxHeight / 2);
-
-                        // // Apply the crop box dimensions
-                        // cropper.setCropBoxData({
-                        //     left: cropBoxLeft,
-                        //     top: cropBoxTop,
-                        //     // width: cropBoxWidth,
-                        //     // height: cropBoxHeight
-                        // });
                     }
 
                 });
@@ -300,7 +245,6 @@ function render_image_widget($config)
                 hasRotateEventAdded = true;
             }
 
-
             function cancelImage() {
                 if (cropper) {
                     cropper.destroy();
@@ -309,70 +253,6 @@ function render_image_widget($config)
                 canvas.style.visibility = 'hidden';
                 imageInput.value = '';
             }
-
-            // function cropAndSave() {
-            //     // Check for cropper initialization
-            //     if (!cropper) {
-            //         console.log("Error: Cropper not initialized.");
-            //         return;
-            //     }
-            //     if (cropper) {
-
-            //         // Get the cropping box dimensions
-            //         const cropData = cropper.getData();
-            //         const cropWidth = cropData.width;
-            //         const cropHeight = cropData.height;
-
-            //         // Calculate new dimensions while keeping the original aspect ratio
-            //         const newWidth = cropWidth;
-            //         const newHeight = cropWidth / aspectRatio;
-            //         const croppedCanvas = cropper.getCroppedCanvas({
-            //             width: newWidth,
-            //             height: newHeight,
-            //             imageSmoothingEnabled: false,
-            //             imageSmoothingQuality: 'high',
-            //         });
-            //         if (!croppedCanvas) {
-            //             console.log("Error: Cropped canvas is null. Make sure crop box is set.");
-            //             return;
-            //         }
-            //         croppedCanvas.toBlob(function(blob) {
-            //             const thumbnail = document.createElement('img');
-            //             thumbnail.src = croppedCanvas.toDataURL();
-            //             thumbnail.width = 100;
-
-            //             // Change 1: Assign index as data attribute
-            //             const index = savedImages.length;
-            //             thumbnail.dataset.index = index;
-
-            //             thumbnail.addEventListener('click', function() {
-            //                 const fullQualityImageSrc = savedFullImages[index];
-            //                 const img = new Image();
-            //                 currentSavedIndex = index; // Update the currentSavedIndex
-            //                 img.src = fullQualityImageSrc;
-            //                 img.onload = function() {
-            //                     start(img);
-            //                 };
-            //             });
-            //             savedImages.push(blob);
-            //             toggleVisibility();
-            //             savedFullImages.push(croppedCanvas.toDataURL());
-            //             container.querySelector('#thumbnails').appendChild(thumbnail);
-            //         }, 'image/jpeg', 1);
-
-            //         if (currentUnsavedIndex !== null) {
-            //             unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            //             renderUnsavedThumbnails();
-            //         }
-            //         currentUnsavedIndex = null;
-
-            //         cropper.destroy();
-            //         buttonContainer.style.display = 'none';
-            //         canvas.style.visibility = 'hidden';
-            //         downloadBtn.style.display = 'block';
-            //         imageInput.value = '';
-            //     }
-            // }
 
             function cropAndSave() {
                 if (!cropper || !originalImage) {
@@ -403,19 +283,11 @@ function render_image_widget($config)
                     sourceHeight = maxSourceY - correctedSourceY;
                 }
 
-
                 const croppedCanvas = document.createElement('canvas');
                 croppedCanvas.width = originalImage.naturalWidth;
                 croppedCanvas.height = originalImage.naturalHeight;
 
                 const ctx = croppedCanvas.getContext('2d');
-
-                console.log('sourceX: ', sourceX);
-                console.log('sourceY: ', sourceY);
-                console.log('sourceWidth: ', sourceWidth);
-                console.log('sourceHeight: ', sourceHeight);
-                console.log('globalDx: ', globalDx);
-                console.log('globalDy: ', globalDy);
 
                 ctx.drawImage(
                     originalImage,
@@ -472,8 +344,6 @@ function render_image_widget($config)
                     console.error("Error: Cropper not initialized.");
                     return;
                 }
-                console.log('original WIDTH: ' + originalWidth);
-                console.log('original HEIGHT: ' + originalHeight);
                 const croppedCanvas = cropper.getCroppedCanvas({
                     width: originalWidth,
                     height: originalHeight
@@ -498,8 +368,6 @@ function render_image_widget($config)
                         img.src = fullQualityImageSrc;
                         
                         img.onload = function() {
-                            console.log('img ON THUMb CLICK width: ' + img.width);
-                            console.log('img height: ' + img.height);
                             start(img);
                         };
                     });
@@ -523,166 +391,6 @@ function render_image_widget($config)
                 downloadBtn.style.display = 'block';
                 imageInput.value = '';
             }
-
-            // function saveImage() {
-            //     if (!cropper) {
-            //         console.error("Error: Cropper not initialized.");
-            //         return;
-            //     }
-
-            //     if (selectedImages.length === 0) {
-            //         console.error("Error: No image selected.");
-            //         return;
-            //     }
-
-            //     const originalImage = selectedImages[selectedImages.length - 1]; // Use the last selected image
-            //     const thumbnail = document.createElement('img');
-            //     thumbnail.src = originalImage.src;
-            //     thumbnail.width = 100;
-            //     thumbnail.dataset.index = savedImages.length;
-
-            //     thumbnail.addEventListener('click', function() {
-            //         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-            //         const fullQualityImage = selectedImages[index];
-            //         currentSavedIndex = index; // Update the currentSavedIndex
-            //         start(fullQualityImage, index);
-            //     });
-
-            //     savedImages.push(originalImage);
-            //     toggleVisibility();
-            //     container.querySelector('#thumbnails').appendChild(thumbnail);
-            //     console.log('CURRENT UNSAVED INDEX: ', currentUnsavedIndex);
-            //     if (currentUnsavedIndex !== null) {
-            //         unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            //         renderUnsavedThumbnails();
-            //     }
-            //     currentUnsavedIndex = null;
-                
-            //     cropper.destroy();
-            //     buttonContainer.style.display = 'none';
-            //     canvas.style.visibility = 'hidden';
-            //     downloadBtn.style.display = 'block';
-            // }
-
-            // function saveImage() {
-            //     if (!cropper) {
-            //         console.error("Error: Cropper not initialized.");
-            //         return;
-            //     }
-
-            //     // Assuming imageInput is your file input element
-            //     const imageInput = container.querySelector('#image');
-
-            //     // Get the selected image index from a variable, let's call it selectedImageIndex
-            //     if (selectedImageIndex === null || selectedImageIndex < 0 || selectedImageIndex >= unsavedThumbnails.length) {
-            //         console.error("Error: No image selected.");
-            //         return;
-            //     }
-            //     console.log('SELECTED IMAGE INDEX: ', selectedImageIndex);
-            //     console.log('UNSAVED THUMBS: ', unsavedThumbnails)
-            //     console.log('SELECTED IMAGES: ', selectedImages)
-            //     // Get the original image corresponding to the selected index
-            //     let originalImage = unsavedThumbnails[selectedImageIndex];
-            //     if (!originalImage) {
-            //         originalImage = selectedImages[selectedImageIndex];
-            //     }
-            //     if (!originalImage) {
-            //         window.alert('previously saved images cannot be saved again');
-            //         console.error("Error: No image selected.");
-            //         return;
-            //     }
-
-            //     // Create a canvas element and draw the original image on it
-            //     const canvas = document.createElement('canvas');
-            //     canvas.width = originalImage.naturalWidth;
-            //     canvas.height = originalImage.naturalHeight;
-            //     const ctx = canvas.getContext('2d');
-            //     ctx.drawImage(originalImage, 0, 0);
-
-            //     // Convert the canvas content to a blob and create a data URL
-            //     canvas.toBlob(function (blob) {
-            //         if (!blob) {
-            //             console.error("Error: Failed to create a blob.");
-            //             return;
-            //         }
-            //         const reader = new FileReader();
-            //         reader.onload = function () {
-            //             const thumbnail = document.createElement('img');
-            //             thumbnail.src = reader.result;
-            //             thumbnail.width = 100;
-            //             thumbnail.dataset.index = savedImages.length;
-
-            //             thumbnail.addEventListener('click', function () {
-            //                 const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-            //                 const fullQualityImageSrc = savedFullImages[index];
-            //                 currentSavedIndex = index; // Update the currentSavedIndex
-            //                 const img = new Image();
-            //                 img.src = fullQualityImageSrc;
-
-            //                 img.onload = function () {
-            //                     start(img);
-            //                 };
-            //             });
-
-            //             savedImages.push(blob);
-            //             toggleVisibility();
-            //             savedFullImages.push(reader.result);
-            //             container.querySelector('#thumbnails').appendChild(thumbnail);
-            //             console.log('CURRENT UNSAVCE INDEX: ', currentUnsavedIndex)
-            //             if (currentUnsavedIndex !== null) {
-            //                 unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            //                 renderUnsavedThumbnails();
-            //             }
-            //             currentUnsavedIndex = null;
-            //         };
-            //         reader.readAsDataURL(blob);
-            //     }, 'image/jpeg', 1);
-
-            //     cropper.destroy();
-            //     buttonContainer.style.display = 'none';
-            //     let currentCanvas = container.querySelector('#canvas');
-            //     canvas.style.visibility = 'hidden';
-            //     currentCanvas.style.visibility = 'hidden';
-            //     console.log('CANVAS: ', canvas);
-            //     console.log('canvas style visibility: ', canvas.style.visibility);
-            //     downloadBtn.style.display = 'block';
-            //     imageInput.value = '';
-            // }
-
-
-
-            // const onDrop = (e) => {
-            //     e.preventDefault();
-            //     const files = e.dataTransfer.files;
-            //     const filesArray = Array.from(files);
-            //     if (savedImages.length + filesArray.length > max_photos) {
-            //         alert('Maximum number of photos reached.');
-            //         return;
-            //     }
-            //     if (existingFilesCount >= max_photos) {
-            //         alert('Maximum number of photos reached.');
-            //         return;
-            //     }
-            //     Array.from(files).forEach(file => {
-            //         const reader = new FileReader();
-            //         reader.onload = function(e) {
-            //             const img = new Image();
-            //             img.src = e.target.result;
-            //             img.onload = function() {
-            //                 const validation = validateImage(img);
-            //                 if (!validation.isValid) {
-            //                     alert(validation.error);
-            //                     container.querySelector('#image').value = '';
-            //                     return;
-            //                 }
-            //                 unsavedThumbnails.push(img);
-            //                 renderUnsavedThumbnails();
-            //                 start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
-            //             };
-            //         };
-            //         reader.readAsDataURL(file);
-            //     });
-            // };
 
             const onDrop = (e) => {
                 e.preventDefault();
@@ -718,7 +426,6 @@ function render_image_widget($config)
                 });
             };
 
-
             function onImageUpload(event) {
                 const files = event.target.files;
                 const filesArray = Array.from(files);
@@ -753,7 +460,6 @@ function render_image_widget($config)
                 });
             }
 
-            
             function renderUnsavedThumbnails() {
                 const unsavedArea = container.querySelector('#unsaved-thumbnails');
                 unsavedArea.innerHTML = '';
@@ -801,7 +507,6 @@ function render_image_widget($config)
                 }
             }
    
-
 
             function downloadImages() {
                 const imagePromises = savedImages.map(blob => {
@@ -871,51 +576,6 @@ function render_image_widget($config)
                         console.error("Failed to convert blobs to data URLs: ", error);
                     });
             }
-
-            //send to server
-            // function downloadImages() {
-            //     Promise.all(savedImages.map(blob => new Promise((resolve, reject) => {
-            //             const reader = new FileReader();
-            //             reader.onloadend = function() {
-            //                 resolve(reader.result);
-            //             };
-            //             reader.onerror = reject;
-            //             reader.readAsDataURL(blob);
-            //         })))
-            //         .then(dataUrls => {
-            //             const xhr = new XMLHttpRequest();
-            //             xhr.open('POST', 'download_images.php', true);
-            //             xhr.setRequestHeader('Content-Type', 'application/json');
-            //             xhr.onreadystatechange = function() { // Added this block for handling response
-            //                 if (xhr.readyState === 4 && xhr.status === 200) {
-            //                     const response = JSON.parse(xhr.responseText);
-            //                     if (response.status === 'success') {
-            //                         alert('Images successfully uploaded.'); // Success message here
-            //                         container.querySelector('#thumbnails').innerHTML = '';
-            //                         // buttonContainer.style.display = 'none';
-            //                         downloadBtn.style.display = 'none';
-            //                         const imagesText = container.querySelector('#images-text');
-
-            //                         imagesText.style.display = 'none';
-
-            //                         savedImages = [];
-            //                     } else {
-            //                         alert('Upload failed: ' + response.status);
-            //                     }
-            //                 }
-            //             };
-            //             xhr.send(JSON.stringify({
-            //                 images: dataUrls,
-            //                 path: file_path,
-            //                 max_photos: max_photos,
-            //                 existing_files_count: existingFilesCount
-            //             }));
-            //         })
-            //         .catch(error => {
-            //             console.error("Failed to convert blobs to data URLs: ", error);
-            //         });
-
-            // }
 
             // save to local machine
             // function downloadImages() {
