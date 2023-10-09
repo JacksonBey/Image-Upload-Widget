@@ -284,16 +284,26 @@ function render_image_widget($config)
                 }
 
                 const croppedCanvas = document.createElement('canvas');
-                croppedCanvas.width = originalImage.naturalWidth;
-                croppedCanvas.height = originalImage.naturalHeight;
-
                 const ctx = croppedCanvas.getContext('2d');
+
+                // croppedCanvas.width = originalImage.naturalWidth;
+                // croppedCanvas.height = originalImage.naturalHeight;
+
+
+                // ctx.drawImage(
+                //     originalImage,
+                //     sourceX, sourceY, sourceWidth, sourceHeight,
+                //     0, 0, originalImage.naturalWidth, originalImage.naturalHeight
+                // );
+                croppedCanvas.width = sourceWidth;
+                croppedCanvas.height = sourceHeight;
 
                 ctx.drawImage(
                     originalImage,
                     sourceX, sourceY, sourceWidth, sourceHeight,
-                    0, 0, originalImage.naturalWidth, originalImage.naturalHeight
+                    0, 0, sourceWidth, sourceHeight
                 );
+
 
                 croppedCanvas.toBlob(function(blob) {
                     const thumbnail = document.createElement('img');

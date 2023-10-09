@@ -56,6 +56,8 @@ $config = [
 render_image_widget($config);
 \`\`\`
 
+php -S localhost:8000
+
 ## Configuration
 
 The widget accepts an associative array of configuration parameters:
