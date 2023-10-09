@@ -37,8 +37,8 @@ function render_image_widget($config)
                 <button id="download" style="display: none;" class="standard-button">Upload</button>
             </div>
             <div class="img-upload-container">
-                <label for="image" class="custom-file-upload">
-                    <input type="file" name="" id="image" required accept="image/*" multiple>
+                <label for="image-<?php echo $unique_id; ?>" class="custom-file-upload">
+                    <input type="file" name="" id="image-<?php echo $unique_id; ?>" required accept="image/*" multiple>
                     <span id="file-upload-text">Drag Your File(s) Here or Click to Choose</span>
                 </label>
             </div>
@@ -135,7 +135,8 @@ function render_image_widget($config)
             const saveBtn = container.querySelector('#save');
             const downloadBtn = container.querySelector('#download');
             const deleteBtn = container.querySelector('#delete');
-            let imageInput = container.querySelector('#image');
+            // let imageInput = container.querySelector('#image');
+            let imageInput = container.querySelector(`#image-${unique_id}`);
             const tooltip = container.querySelector('.crop-tooltip');
 
             function initializeEventListeners() {
@@ -170,7 +171,8 @@ function render_image_widget($config)
                     onDrop(e)
                 });
 
-                imageInput = container.querySelector('#image');
+                // imageInput = container.querySelector('#image');
+                imageInput = container.querySelector(`#image-${unique_id}`);
                 imageInput.addEventListener('change', function(e) {
                     const files = e.target.files; // This will give you the FileList
                     if (files.length > 0) {
