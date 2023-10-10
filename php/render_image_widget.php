@@ -616,11 +616,22 @@ function render_image_widget($config)
                 if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
                     // Remove from saved thumbnails and images
                     const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
+                    console.log('thumbnailElement: ', thumbnailElement)
                     if (thumbnailElement) {
                         thumbnailElement.remove();
+
+                        // Store the image URL before splicing.
+                        const imgURLToDelete = savedImages[currentSavedIndex];
+
+                        // Now remove the image from savedImages.
+                        savedImages.splice(currentSavedIndex, 1);
+
+                        // Then delete it from the server.
+                        console.log('DELETE IMAGE>?: ', imgURLToDelete);
+                        deleteFromServer(imgURLToDelete);
+
                         savedImages.splice(currentSavedIndex, 1);
                         savedFullImages.splice(currentSavedIndex, 1);
-
                         // Re-index remaining thumbnails
                         const remainingThumbnails = container.querySelectorAll('#thumbnails > img');
                         remainingThumbnails.forEach((thumbnail, index) => {
@@ -647,6 +658,64 @@ function render_image_widget($config)
                 imageInput.value = '';
             }
 
+            function deleteFromServer(imgURL) {
+                fetch('delete_image.php', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ path: imgURL }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                    // Remove the image thumbnail from the page and other clean-up actions
+                    } else {
+                    console.error('Failed to delete image:', data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+
+
+
+
+            function fetchExistingFiles() {
+                // let filePath = '<?php echo $file_path; ?>';
+                fetch(`fetch_images.php?path=${file_path}`)
+                .then(response => response.json())
+                .then(data => {
+                    savedImages = data;
+                    renderSavedThumbnails();
+                })
+                .catch(error => console.error("Failed to fetch existing images:", error));
+            }
+
+            function renderSavedThumbnails(){
+                const savedArea = container.querySelector('#thumbnails');
+                savedArea.innerHTML = '';
+                savedImages.forEach((imgURL, index) => {
+
+
+                    const thumbnail = new Image();
+                    thumbnail.src = imgURL;
+                    thumbnail.width = 100;
+                    thumbnail.dataset.index = index;
+                    thumbnail.style.border = '2px solid blue'; // Blue border for saved
+                    thumbnail.addEventListener('click', function() {
+                        index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                        const fullQualityImageSrc = savedFullImages[index];
+                        currentSavedIndex = index; // Update the currentSavedIndex
+
+                        start(thumbnail, index);
+                    });
+                    savedArea.appendChild(thumbnail);
+                });
+            }
+
+
 
 
             // Main Execution
@@ -654,6 +723,8 @@ function render_image_widget($config)
                 // Main function to execute the script
                 initializeEventListeners();
                 // fetchExistingFilesCount();
+
+                fetchExistingFiles();
             }
 
             // Execute the main function when the document is ready
