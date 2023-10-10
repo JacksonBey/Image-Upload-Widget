@@ -521,7 +521,9 @@ function render_image_widget($config)
    
 
             function downloadImages() {
-                const imagePromises = savedImages.map(blob => {
+                const imagePromises = savedImages
+                .filter(blob => blob instanceof Blob) // Filter out anything that's not a Blob
+                .map(blob => {
                     return new Promise((resolve, reject) => {
                         const canvas = document.createElement('canvas');
                         const img = new Image();
@@ -530,8 +532,10 @@ function render_image_widget($config)
                             canvas.height = img.naturalHeight;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0);
+                            
                             canvas.toBlob(
                                 blob => {
+                                    
                                     if (!blob) {
                                         reject(new Error("Failed to create a blob."));
                                         return;
@@ -543,12 +547,18 @@ function render_image_widget($config)
                                     reader.readAsDataURL(blob);
                                 },
                                 'image/jpeg',
-                                1
+                                
                             );
+                            URL.revokeObjectURL(img.src); // Release the object URL
+
                         };
                         img.onerror = () => {
                             reject(new Error("Failed to load image."));
+                            URL.revokeObjectURL(img.src); // Release the object URL
+
                         };
+                        console.log("Blob before createObjectURL:", blob);
+
                         img.src = URL.createObjectURL(blob);
                     });
                 });
@@ -569,6 +579,7 @@ function render_image_widget($config)
                                         const imagesText = container.querySelector('#images-text');
                                         imagesText.style.display = 'none';
                                         savedImages = [];
+                                        fetchExistingFiles();
                                     } else {
                                         alert('Upload failed: ' + response.status);
                                     }
