@@ -317,6 +317,7 @@ function render_image_widget($config)
                         thumbnail.width = 100;
                         thumbnail.maxHeight = 100;
                         thumbnail.dataset.index = savedImages.length;
+                        thumbnail.style.border = '2px solid blue'; // Blue border for saved
 
                         thumbnail.addEventListener('click', function () {
                             const index = parseInt(this.dataset.index); // Retrieve index from data attribute
@@ -383,6 +384,8 @@ function render_image_widget($config)
                     thumbnail.src = croppedCanvas.toDataURL();
                     thumbnail.width = 100;
                     thumbnail.dataset.index = savedImages.length;
+                    thumbnail.style.border = '2px solid blue'; // Blue border for saved
+
 
                     thumbnail.addEventListener('click', function() {
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
@@ -743,7 +746,6 @@ function render_image_widget($config)
                     thumbnail.src = imgURL;
                     thumbnail.width = 100;
                     thumbnail.dataset.index = index;
-                    thumbnail.style.border = '2px solid blue'; // Blue border for saved
                     thumbnail.addEventListener('click', function() {
                         index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
