@@ -345,14 +345,14 @@ function render_image_widget($config)
                             currentUnsavedIndex = null;
                         }
 
-                        // if (currentSelectedSavedIndex !== null) {
-                        //     savedImages[currentSelectedSavedIndex] = img;
-                        //     // Call API to replace image on the server here.
-                        //     currentSelectedSavedIndex = null;
-                        // } else {
-                        //     savedImages.push(img);
-                        // }
-                        savedImages.push(blob);
+                        if (currentSelectedSavedIndex !== null) {
+                            savedImages[currentSelectedSavedIndex] = img;
+                            // Call API to replace image on the server here.
+                            currentSelectedSavedIndex = null;
+                        } else {
+                            savedImages.push(img);
+                        }
+                        // savedImages.push(blob);
                         savedFullImages.push(reader.result);
 
                         toggleVisibility();
@@ -684,9 +684,6 @@ function render_image_widget($config)
 
                         // Store the image URL before splicing.
                         const imgURLToDelete = savedImages[currentSavedIndex];
-
-                        // Now remove the image from savedImages.
-                        savedImages.splice(currentSavedIndex, 1);
 
                         // Then delete it from the server.
                         if (typeof imgURLToDelete === 'string') {
