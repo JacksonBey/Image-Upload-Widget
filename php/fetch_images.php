@@ -8,7 +8,11 @@
     $dir = new DirectoryIterator($file_path);
     foreach ($dir as $fileinfo) {
       if (!$fileinfo->isDot()) {
-        array_push($files, $file_path . '/' . $fileinfo->getFilename());
+        $fileData = [
+          'path' => $file_path . '/' . $fileinfo->getFilename(),
+          'name' => $fileinfo->getFilename()
+        ];
+        array_push($files, $fileData);
       }
     }
   }

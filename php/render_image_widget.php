@@ -126,6 +126,7 @@ function render_image_widget($config)
             let originalImage = null; 
             let globalDx = 0;
             let globalDy = 0;
+            let savedFileNames = [];
 
 
             // DOM Elements
@@ -266,6 +267,8 @@ function render_image_widget($config)
                 }
 
                 const cropData = cropper.getData();
+                const rotateData = cropData.rotate; // Cropper.js gives the rotation angle
+
                 const scaleX = originalImage.naturalWidth / canvas.width;
                 const scaleY = originalImage.naturalHeight / canvas.height;
 
@@ -294,11 +297,23 @@ function render_image_widget($config)
                 croppedCanvas.width = sourceWidth;
                 croppedCanvas.height = sourceHeight;
 
+
+                if (rotateData) {
+                    ctx.save();
+                    ctx.translate(croppedCanvas.width / 2, croppedCanvas.height / 2);
+                    ctx.rotate((Math.PI / 180) * rotateData);
+                    ctx.translate(-croppedCanvas.width / 2, -croppedCanvas.height / 2);
+                }
+
                 ctx.drawImage(
                     originalImage,
                     sourceX, sourceY, sourceWidth, sourceHeight,
                     0, 0, sourceWidth, sourceHeight
                 );
+
+                if (rotateData) {
+                    ctx.restore();  // Restore the canvas state if rotated
+                }
 
 
                 croppedCanvas.toBlob(function(blob) {
@@ -324,6 +339,8 @@ function render_image_widget($config)
                             const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                             const fullQualityImageSrc = savedFullImages[index];
                             currentSavedIndex = index; // Update the currentSavedIndex
+                            currentSelectedSavedIndex = index;
+
                             const img = new Image();
                             if (typeof fullQualityImageSrc === 'string') {
                                 // Handle URLs
@@ -346,17 +363,43 @@ function render_image_widget($config)
                         }
 
                         if (currentSelectedSavedIndex !== null) {
-                            savedImages[currentSelectedSavedIndex] = img;
-                            // Call API to replace image on the server here.
+                            savedImages[currentSelectedSavedIndex] = blob;
+                            
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', 'replace_image.php', true);
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === 4 && xhr.status === 200) {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.success) {
+                                        console.log('Image replaced successfully.');
+                                    } else {
+                                        console.error('Failed to replace image:', response.message);
+                                    }
+                                }
+                            };
+
+                            const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
+                            xhr.send(`file_path=${file_path}&file_name=${file_name}&image_data=${image_data}`);
+
+
+                            // Find and replace the existing thumbnail element with the same data-index
+                            const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+                            console.log('existingThumbnail: ', existingThumbnail);
+
+                            if (existingThumbnail) {
+                                existingThumbnail.replaceWith(thumbnail);
+                            }
                             currentSelectedSavedIndex = null;
                         } else {
                             savedImages.push(blob);
+                            container.querySelector('#thumbnails').appendChild(thumbnail);
                         }
                         // savedImages.push(blob);
                         savedFullImages.push(reader.result);
 
                         toggleVisibility();
-                        container.querySelector('#thumbnails').appendChild(thumbnail);
                     };
                     reader.readAsDataURL(blob);
                 }, 'image/jpeg', 1);
@@ -397,6 +440,8 @@ function render_image_widget($config)
                     thumbnail.addEventListener('click', function() {
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
+
+                        currentSelectedSavedIndex = index;
                         currentSavedIndex = index; // Update the currentSavedIndex
                         const img = new Image();
                         if (typeof fullQualityImageSrc === 'string') {
@@ -414,16 +459,61 @@ function render_image_widget($config)
                     });
 
                     // savedImages.push(blob);
+                    // if (currentSelectedSavedIndex !== null) {
+                    //     savedImages[currentSelectedSavedIndex] = blob;
+                    //     savedFileNames[currentSelectedSavedIndex] = `temp`;  // Update file name if needed
                     if (currentSelectedSavedIndex !== null) {
-                        savedImages[currentSelectedSavedIndex] = img;
-                        // Call API to replace image on the server here.
+                    // Only replace if a file with this index already exists
+                    if(savedFileNames[currentSelectedSavedIndex]) {
+                        // Update blob in savedImages
+                        savedImages[currentSelectedSavedIndex] = blob;
+
+                        // Retrieve existing file name
+                        const existingFileName = savedFileNames[currentSelectedSavedIndex];
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'replace_image.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.success) {
+                                    console.log('Image replaced successfully.');
+                                } else {
+                                    console.error('Failed to replace image:', response.message);
+                                }
+                            }
+                        };
+
+                        const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
+                        xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
+
+
                         currentSelectedSavedIndex = null;
+
+                        // Find and replace the existing thumbnail element with the same data-index
+                        const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+                        if (existingThumbnail) {
+                            existingThumbnail.replaceWith(thumbnail);
+                        }
                     } else {
+                console.error('No existing file for this index.');
+            }
+                    } else {
+                        // Generate a new file name (you can modify this logic as needed)
+                        const newFileName = `temp_${savedFileNames.length + 1}.jpg`;
+                        
+                        // Push blob and filename
                         savedImages.push(blob);
+                        savedFileNames.push(newFileName);
+                        savedImages.push(blob);
+                        savedFileNames.push(`temp`);
+                        container.querySelector('#thumbnails').appendChild(thumbnail);
                     }
                     toggleVisibility();
                     savedFullImages.push(croppedCanvas.toDataURL());
-                    container.querySelector('#thumbnails').appendChild(thumbnail);
+                    // renderSavedThumbnails();
 
                     if (currentUnsavedIndex !== null) {
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
@@ -543,6 +633,26 @@ function render_image_widget($config)
                 toggleVisibility();
             }
 
+            function renderSavedThumbnails(){
+                const savedArea = container.querySelector('#thumbnails');
+                savedArea.innerHTML = '';
+                savedImages.forEach((imgURL, index) => {
+                    const thumbnail = new Image();
+                    thumbnail.src = imgURL;
+                    thumbnail.width = 100;
+                    thumbnail.dataset.index = index;
+                    thumbnail.addEventListener('click', function() {
+                        index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                        const fullQualityImageSrc = savedFullImages[index];
+                        currentSelectedSavedIndex = index;
+                        currentSavedIndex = index; // Update the currentSavedIndex
+
+                        start(thumbnail, index);
+                    });
+                    savedArea.appendChild(thumbnail);
+                });
+            }
+
             function toggleSaveImageText() {
                 const imagesText = container.querySelector('#images-text');
                 const downloadBtn = container.querySelector('#download');
@@ -571,49 +681,41 @@ function render_image_widget($config)
                     hasUnsavedThumbnails = newHasUnsavedThumbnails;
                 }
             }
-   
-
+            
             function downloadImages() {
                 const imagePromises = savedImages
-                .filter(blob => blob instanceof Blob) // Filter out anything that's not a Blob
-                .map(blob => {
-                    return new Promise((resolve, reject) => {
-                        const canvas = document.createElement('canvas');
-                        const img = new Image();
-                        img.onload = () => {
-                            canvas.width = img.naturalWidth;
-                            canvas.height = img.naturalHeight;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
-                            
-                            canvas.toBlob(
-                                blob => {
-                                    
-                                    if (!blob) {
-                                        reject(new Error("Failed to create a blob."));
-                                        return;
-                                    }
-                                    const reader = new FileReader();
-                                    reader.onload = () => {
-                                        resolve(reader.result);
-                                    };
-                                    reader.readAsDataURL(blob);
-                                },
-                                'image/jpeg',
+                    .filter(blob => blob instanceof Blob) // Filter out anything that's not a Blob
+                    .map(blob => {
+                        return new Promise((resolve, reject) => {
+                            const canvas = document.createElement('canvas');
+                            const img = new Image();
+                            img.onload = () => {
+                                canvas.width = img.naturalWidth;
+                                canvas.height = img.naturalHeight;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
                                 
-                            );
-                            // URL.revokeObjectURL(img.src); // Release the object URL
-
-                        };
-                        img.onerror = () => {
-                            reject(new Error("Failed to load image."));
-                            // URL.revokeObjectURL(img.src); // Release the object URL
-
-                        };
-
-                        img.src = URL.createObjectURL(blob);
+                                canvas.toBlob(
+                                    blob => {
+                                        if (!blob) {
+                                            reject(new Error("Failed to create a blob."));
+                                            return;
+                                        }
+                                        const reader = new FileReader();
+                                        reader.onload = () => {
+                                            resolve(reader.result);
+                                        };
+                                        reader.readAsDataURL(blob);
+                                    },
+                                    'image/jpeg',
+                                );
+                            };
+                            img.onerror = () => {
+                                reject(new Error("Failed to load image."));
+                            };
+                            img.src = URL.createObjectURL(blob);
+                        });
                     });
-                });
 
                 Promise.all(imagePromises)
                     .then(dataUrls => {
@@ -625,7 +727,7 @@ function render_image_widget($config)
                                 if (xhr.status === 200) {
                                     const response = JSON.parse(xhr.responseText);
                                     if (response.status === 'success') {
-                                        alert('Images successfully uploaded.'); // Success message here
+                                        alert('Images successfully uploaded.');
                                         container.querySelector('#thumbnails').innerHTML = '';
                                         downloadBtn.style.display = 'none';
                                         const imagesText = container.querySelector('#images-text');
@@ -642,6 +744,7 @@ function render_image_widget($config)
                         };
                         xhr.send(JSON.stringify({
                             images: dataUrls,
+                            fileNames: savedFileNames,  // new line to send file names
                             path: file_path,
                             max_photos: max_photos,
                             existing_files_count: existingFilesCount
@@ -651,6 +754,7 @@ function render_image_widget($config)
                         console.error("Failed to convert blobs to data URLs: ", error);
                     });
             }
+
 
             // save to local machine
             // function downloadImages() {
@@ -740,40 +844,17 @@ function render_image_widget($config)
             }
 
             function fetchExistingFiles() {
-                // let filePath = '<?php echo $file_path; ?>';
                 fetch(`fetch_images.php?path=${file_path}`)
-                .then(response => response.json())
-                .then(data => {
-                    savedImages = data;
-                    savedFullImages = data;
-                    renderSavedThumbnails();
-                    toggleVisibility()
-                })
-                .catch(error => console.error("Failed to fetch existing images:", error));
+                    .then(response => response.json())
+                    .then(data => {
+                        savedImages = data.map(item => item.path);
+                        savedFileNames = data.map(item => item.name); // new line to store file names
+                        savedFullImages = [...savedImages];
+                        renderSavedThumbnails();
+                        toggleVisibility();
+                    })
+                    .catch(error => console.error("Failed to fetch existing images:", error));
             }
-
-            function renderSavedThumbnails(){
-                const savedArea = container.querySelector('#thumbnails');
-                savedArea.innerHTML = '';
-                savedImages.forEach((imgURL, index) => {
-                    const thumbnail = new Image();
-                    thumbnail.src = imgURL;
-                    thumbnail.width = 100;
-                    thumbnail.dataset.index = index;
-                    thumbnail.addEventListener('click', function() {
-                        index = parseInt(this.dataset.index); // Retrieve index from data attribute
-                        const fullQualityImageSrc = savedFullImages[index];
-                        currentSelectedSavedIndex = index;
-                        currentSavedIndex = index; // Update the currentSavedIndex
-
-                        start(thumbnail, index);
-                    });
-                    savedArea.appendChild(thumbnail);
-                });
-            }
-
-
-
 
             // Main Execution
             function main() {
