@@ -323,8 +323,8 @@ function render_image_widget($config)
                         thumbnail.src = reader.result;
                         thumbnail.width = 100;
                         thumbnail.maxHeight = 100;
-                        console.log('selectedindex: ', selectedImageIndex);
-                        console.log('currentUnsavedIndex: ', currentUnsavedIndex);
+                        // console.log('selectedindex: ', selectedImageIndex);
+                        // console.log('currentUnsavedIndex: ', currentUnsavedIndex);
                         // if(currentUnsavedIndex) {
                         //     thumbnail.dataset.index = currentUnsavedIndex;
                         // } else if(selectedImageIndex) {
@@ -332,11 +332,53 @@ function render_image_widget($config)
                         // } else {
                         //     thumbnail.dataset.index = savedImages.length;
                         // }
-                        thumbnail.dataset.index = savedImages.length;
+                        // console.log('savedImages.length: ', savedImages.length);
+                        // console.log('SETTING INDEX')
+
+                        const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+                        console.log('existingThumbnail?: ', existingThumbnail);
+                        console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
+                        if(existingThumbnail === null){
+                            console.log('!existingThumbnail')
+                            savedImages.push(blob);
+                            savedFileNames.push(null);
+                            savedFullImages.push(reader.result);
+                            thumbnail.dataset.index = savedImages.length -1;
+
+
+                        } else {
+                            savedImages[currentSelectedSavedIndex] = blob;
+                            thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
+                            savedFullImages[currentSelectedSavedIndex] = reader.result;
+
+                        }
+                        console.log('savedImages: ', savedImages);
+
+                        console.log('savedImages.length after: ', savedImages.length);
+
+
+                        // let indexToUse;
+                        // const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+
+                        // if(existingThumbnail === null){
+                        //     savedImages.push(blob);
+                        //     savedFileNames.push(null);
+                        //     savedFullImages.push(reader.result);
+                        //     indexToUse = savedImages.length - 1;  // Use last index
+                        // } else {
+                        //     // Update blob in savedImages
+                        //     savedImages[currentSelectedSavedIndex] = blob;
+                        //     indexToUse = currentSelectedSavedIndex;  // Use existing index
+                        // }
+
+                        // thumbnail.dataset.index = indexToUse;
+
                         thumbnail.style.border = '2px solid blue'; // Blue border for saved
 
                         thumbnail.addEventListener('click', function () {
                             const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                            console.log('THUMB CLICK! index: ', index)
+
                             const fullQualityImageSrc = savedFullImages[index];
                             currentSavedIndex = index; // Update the currentSavedIndex
                             currentSelectedSavedIndex = index;
@@ -363,47 +405,53 @@ function render_image_widget($config)
                         }
 
                         if (currentSelectedSavedIndex !== null) {
-                            savedImages[currentSelectedSavedIndex] = blob;
-                            
-                            const xhr = new XMLHttpRequest();
-                            xhr.open('POST', 'replace_image.php', true);
-                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                            // Only replace if a file with this index already exists
+                            if(savedFileNames[currentSelectedSavedIndex]) {
+                                // Update blob in savedImages
+                                savedImages[currentSelectedSavedIndex] = blob;
 
-                            xhr.onreadystatechange = function() {
-                                if (xhr.readyState === 4 && xhr.status === 200) {
-                                    const response = JSON.parse(xhr.responseText);
-                                    if (response.success) {
-                                        console.log('Image replaced successfully.');
-                                    } else {
-                                        console.error('Failed to replace image:', response.message);
+                                // Retrieve existing file name
+                                const existingFileName = savedFileNames[currentSelectedSavedIndex];
+
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('POST', 'replace_image.php', true);
+                                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                                xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === 4 && xhr.status === 200) {
+                                        const response = JSON.parse(xhr.responseText);
+                                        if (response.success) {
+                                            console.log('Image replaced successfully.');
+                                        } else {
+                                            console.error('Failed to replace image:', response.message);
+                                        }
                                     }
-                                }
-                            };
+                                };
 
-                            const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
-                            xhr.send(`file_path=${file_path}&file_name=${file_name}&image_data=${image_data}`);
+                                const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
+                                xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
+
+                            } 
 
 
-                            // Find and replace the existing thumbnail element with the same data-index
-                            const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
-                            console.log('existingThumbnail: ', existingThumbnail);
 
-                            if (existingThumbnail) {
-                                existingThumbnail.replaceWith(thumbnail);
-                            }
-                            currentSelectedSavedIndex = null;
-                        } else {
-                            savedImages.push(blob);
+
+                        }
+                        if(existingThumbnail === null) {
+                            console.log('PUSHING')
                             container.querySelector('#thumbnails').appendChild(thumbnail);
+                        } else {
+                            existingThumbnail.replaceWith(thumbnail);
                         }
                         // savedImages.push(blob);
-                        savedFullImages.push(reader.result);
-
                         toggleVisibility();
                     };
                     reader.readAsDataURL(blob);
+                    // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                    // currentSelectedSavedIndex = null;
                 }, 'image/jpeg', 1);
-
+                // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                // currentSelectedSavedIndex = null;
                 cropper.destroy();
                 buttonContainer.style.display = 'none';
                 canvas.style.visibility = 'hidden';
@@ -433,12 +481,51 @@ function render_image_widget($config)
 
                     thumbnail.src = croppedCanvas.toDataURL();
                     thumbnail.width = 100;
-                    thumbnail.dataset.index = savedImages.length;
+                    console.log('savedImages.length: ', savedImages.length);
+                    console.log('savedImages BEFORE: ', savedImages);
+                        console.log('SETTING INDEX')
+
+                        const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+                        console.log('existingThumbnail?: ', existingThumbnail);
+                        if(existingThumbnail === null){
+                            savedImages.push(blob);
+                            savedFileNames.push(null);
+                            savedFullImages.push(croppedCanvas.toDataURL());
+                            thumbnail.dataset.index = savedImages.length -1;
+
+
+                        } else {
+                            console.log('CURRENTselectedSavedIndex: ', currentSelectedSavedIndex);
+                            thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
+                            savedImages[currentSelectedSavedIndex] = blob;
+                            savedFullImages[currentSelectedSavedIndex] = croppedCanvas.toDataURL();
+                        }
+                    console.log('savedImages.length AFTER: ', savedImages.length);
+
+                    // thumbnail.dataset.index = savedImages.length -1;
+
+                    // let indexToUse;
+                    // const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+
+                    // if(existingThumbnail === null){
+                    //     savedImages.push(blob);
+                    //     savedFileNames.push(null);
+                    //     savedFullImages.push(croppedCanvas.toDataURL());
+                    //     indexToUse = savedImages.length - 1;  // Use last index
+                    // } else {
+                    //     // Update blob in savedImages
+                    //     savedImages[currentSelectedSavedIndex] = blob;
+                    //     indexToUse = currentSelectedSavedIndex;  // Use existing index
+                    // }
+
+                    // thumbnail.dataset.index = indexToUse;
+
                     thumbnail.style.border = '2px solid blue'; // Blue border for saved
 
 
                     thumbnail.addEventListener('click', function() {
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
+                        console.log('THUMB CLICK! index: ', index)
                         const fullQualityImageSrc = savedFullImages[index];
 
                         currentSelectedSavedIndex = index;
@@ -462,57 +549,53 @@ function render_image_widget($config)
                     // if (currentSelectedSavedIndex !== null) {
                     //     savedImages[currentSelectedSavedIndex] = blob;
                     //     savedFileNames[currentSelectedSavedIndex] = `temp`;  // Update file name if needed
+                    console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
                     if (currentSelectedSavedIndex !== null) {
-                    // Only replace if a file with this index already exists
-                    if(savedFileNames[currentSelectedSavedIndex]) {
-                        // Update blob in savedImages
-                        savedImages[currentSelectedSavedIndex] = blob;
+                        // Only replace if a file with this index already exists
+                        if(savedFileNames[currentSelectedSavedIndex]) {
+                            // Update blob in savedImages
+                            savedImages[currentSelectedSavedIndex] = blob;
 
-                        // Retrieve existing file name
-                        const existingFileName = savedFileNames[currentSelectedSavedIndex];
+                            // Retrieve existing file name
+                            const existingFileName = savedFileNames[currentSelectedSavedIndex];
 
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'replace_image.php', true);
-                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', 'replace_image.php', true);
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                const response = JSON.parse(xhr.responseText);
-                                if (response.success) {
-                                    console.log('Image replaced successfully.');
-                                } else {
-                                    console.error('Failed to replace image:', response.message);
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === 4 && xhr.status === 200) {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.success) {
+                                        console.log('Image replaced successfully.');
+                                    } else {
+                                        console.error('Failed to replace image:', response.message);
+                                    }
                                 }
-                            }
-                        };
+                            };
 
-                        const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
-                        xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
+                            const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
+                            xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
 
 
-                        currentSelectedSavedIndex = null;
-
-                        // Find and replace the existing thumbnail element with the same data-index
-                        const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
-                        if (existingThumbnail) {
-                            existingThumbnail.replaceWith(thumbnail);
                         }
-                    } else {
-                console.error('No existing file for this index.');
-            }
+                        // Find and replace the existing thumbnail element with the same data-index
+                        if (existingThumbnail !== null) {
+                            existingThumbnail.replaceWith(thumbnail);
+                            savedFullImages[currentSelectedSavedIndex] = croppedCanvas.toDataURL();
+                        }
+
                     } else {
                         // Generate a new file name (you can modify this logic as needed)
-                        const newFileName = `temp_${savedFileNames.length + 1}.jpg`;
+                        // const newFileName = `temp_${savedFileNames.length + 1}.jpg`;
+                        console.log('PUSHING')
                         
                         // Push blob and filename
-                        savedImages.push(blob);
-                        savedFileNames.push(newFileName);
-                        savedImages.push(blob);
-                        savedFileNames.push(`temp`);
+                        // savedImages.push(blob);
+                        // savedFileNames.push(`temp`);
                         container.querySelector('#thumbnails').appendChild(thumbnail);
                     }
                     toggleVisibility();
-                    savedFullImages.push(croppedCanvas.toDataURL());
                     // renderSavedThumbnails();
 
                     if (currentUnsavedIndex !== null) {
@@ -520,7 +603,10 @@ function render_image_widget($config)
                         renderUnsavedThumbnails();
                         currentUnsavedIndex = null;
                     }
+                    // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                    // currentSelectedSavedIndex = null;
                 }, 'image/jpeg', 1);
+
 
                 cropper.destroy();
                 buttonContainer.style.display = 'none';
@@ -531,6 +617,10 @@ function render_image_widget($config)
 
             const onDrop = (e) => {
                 e.preventDefault();
+
+                console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                currentSelectedSavedIndex = null;
+
                 const files = e.dataTransfer.files;
                 const filesArray = Array.from(files);
                 if (selectedImages.length + filesArray.length > max_photos) {
@@ -572,6 +662,10 @@ function render_image_widget($config)
             function onImageUpload(event) {
                 const files = event.target.files;
                 const filesArray = Array.from(files);
+
+                console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                currentSelectedSavedIndex = null;
+
                 if (savedImages.length + filesArray.length > max_photos) {
                     alert('Maximum number of photos reached.');
                     return;
@@ -621,11 +715,15 @@ function render_image_widget($config)
                     const thumbnail = new Image();
                     thumbnail.src = img.src;
                     thumbnail.width = 100;
+                    console.log('index in UNSAVED ', index);
+                        console.log('SETTING INDEX')
                     thumbnail.dataset.index = index;
                     thumbnail.style.border = '2px solid red'; // Red border for unsaved
                     thumbnail.addEventListener('click', function() {
                         const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
                         currentSelectedUnsavedIndex = index;
+                        console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
+                        currentSelectedSavedIndex = null;
                         start(originalImage, index); // Pass the actual original image object
                     });
                     unsavedArea.appendChild(thumbnail);
@@ -640,11 +738,16 @@ function render_image_widget($config)
                     const thumbnail = new Image();
                     thumbnail.src = imgURL;
                     thumbnail.width = 100;
+                    console.log('SAVED THUMB INDEX ', index);
+                        console.log('SETTING INDEX')
                     thumbnail.dataset.index = index;
                     thumbnail.addEventListener('click', function() {
                         index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
+
                         currentSelectedSavedIndex = index;
+                        console.log('SETTING currentSelectedSavedIndex: ', currentSelectedSavedIndex);
+
                         currentSavedIndex = index; // Update the currentSavedIndex
 
                         start(thumbnail, index);
@@ -799,6 +902,8 @@ function render_image_widget($config)
                         // Re-index remaining thumbnails
                         const remainingThumbnails = container.querySelectorAll('#thumbnails > img');
                         remainingThumbnails.forEach((thumbnail, index) => {
+                            console.log('savedImages.length: ', index);
+                        console.log('SETTING INDEX')
                             thumbnail.dataset.index = index;
                         });
 
