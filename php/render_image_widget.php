@@ -350,7 +350,7 @@ function render_image_widget($config)
                             // Call API to replace image on the server here.
                             currentSelectedSavedIndex = null;
                         } else {
-                            savedImages.push(img);
+                            savedImages.push(blob);
                         }
                         // savedImages.push(blob);
                         savedFullImages.push(reader.result);
