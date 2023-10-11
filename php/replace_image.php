@@ -1,24 +1,34 @@
 <?php
-// ReplaceImage.php
-header('Content-Type: application/json');
-
-$response = ["success" => false, "message" => "Unknown error"];
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $file_path = $_POST['file_path'];
     $file_name = $_POST['file_name'];
-    $blob = $_POST['image_data']; // Base64 encoded image data
+    $image_data = $_FILES['image_data']; // Should now be captured as a file
     
-    $decoded_image = base64_decode(str_replace('data:image/jpeg;base64,', '', $blob));
     $full_path = $file_path . '/' . $file_name;
 
-    if (file_put_contents($full_path, $decoded_image)) {
-        $response["success"] = true;
-        $response["message"] = "Image replaced successfully.";
+    // Validate all required fields
+    if (isset($file_path, $file_name, $image_data) && file_exists($image_data['tmp_name'])) {
+        
+        if (!file_exists($full_path)) {
+            $response["message"] = "File to replace does not exist.";
+            echo json_encode($response);
+            exit;
+        }
+
+        if (move_uploaded_file($image_data['tmp_name'], $full_path)) {
+            $response["success"] = true;
+            $response["message"] = "Image replaced successfully.";
+        } else {
+            $response["message"] = "Failed to replace image.";
+        }
     } else {
-        $response["message"] = "Failed to replace image.";
+        $response["message"] = "Incomplete data. Please send file_path, file_name, and image_data.";
     }
+} else {
+    $response["message"] = "Invalid request method.";
 }
 
 echo json_encode($response);
+
 ?>

@@ -472,9 +472,14 @@ function render_image_widget($config)
                             // Retrieve existing file name
                             const existingFileName = savedFileNames[currentSelectedSavedIndex];
 
+                            const formData = new FormData();
+                            formData.append('file_path', file_path);
+                            formData.append('file_name', existingFileName);
+                            formData.append('image_data', blob); // blob should be your image Blob object
+
                             const xhr = new XMLHttpRequest();
                             xhr.open('POST', 'replace_image.php', true);
-                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                            // Don't set Content-Type manually, FormData will take care of it
 
                             xhr.onreadystatechange = function() {
                                 if (xhr.readyState === 4 && xhr.status === 200) {
@@ -487,10 +492,7 @@ function render_image_widget($config)
                                 }
                             };
 
-                            const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
-                            xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
-
-
+                            xhr.send(formData);
                         }
                         // Find and replace the existing thumbnail element with the same data-index
                         if (existingThumbnail !== null) {
