@@ -204,7 +204,6 @@ function render_image_widget($config)
             }
 
             function start(imageElement, index) {
-                console.log('INDEX: ', index)
                 currentUnsavedIndex = index;
                 originalImage = imageElement;  // Set the original image
                 selectedImageIndex = index;
@@ -312,7 +311,6 @@ function render_image_widget($config)
                     const thumbnail = document.createElement('img');
                     const reader = new FileReader();
                     reader.onload = function () {
-                        console.log("Data URL or Blob: ", reader.result || croppedCanvas.toDataURL());
                         thumbnail.src = reader.result;
                         thumbnail.width = 100;
                         thumbnail.maxHeight = 100;
@@ -324,7 +322,6 @@ function render_image_widget($config)
                             const fullQualityImageSrc = savedFullImages[index];
                             currentSavedIndex = index; // Update the currentSavedIndex
                             const img = new Image();
-                            console.log("Data URL or Blob: ", reader.result || croppedCanvas.toDataURL());
                             if (typeof fullQualityImageSrc === 'string') {
                                 // Handle URLs
                                 img.src = fullQualityImageSrc;
@@ -379,7 +376,6 @@ function render_image_widget($config)
 
                 croppedCanvas.toBlob(function(blob) {
                     const thumbnail = document.createElement('img');
-                    // console.log("Data URL: ", croppedCanvas.toDataURL());
 
                     thumbnail.src = croppedCanvas.toDataURL();
                     thumbnail.width = 100;
@@ -390,9 +386,6 @@ function render_image_widget($config)
                     thumbnail.addEventListener('click', function() {
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
-                        console.log('fullQualityImageSrc: ', fullQualityImageSrc)
-                        console.log('savedFullImages: ', savedFullImages)
-                        console.log('index: ', index)
                         currentSavedIndex = index; // Update the currentSavedIndex
                         const img = new Image();
                         if (typeof fullQualityImageSrc === 'string') {
@@ -413,8 +406,6 @@ function render_image_widget($config)
                     toggleVisibility();
                     savedFullImages.push(croppedCanvas.toDataURL());
                     container.querySelector('#thumbnails').appendChild(thumbnail);
-                    console.log('currentUnsavedImages: ', currentUnsavedIndex)
-                    console.log('unsavedThumbnails: ', unsavedThumbnails)
 
                     if (currentUnsavedIndex !== null) {
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
@@ -585,7 +576,6 @@ function render_image_widget($config)
                             // URL.revokeObjectURL(img.src); // Release the object URL
 
                         };
-                        console.log("Blob before createObjectURL:", blob);
 
                         img.src = URL.createObjectURL(blob);
                     });
@@ -655,7 +645,6 @@ function render_image_widget($config)
                 if (currentSavedIndex !== null && currentSavedIndex !== undefined) {
                     // Remove from saved thumbnails and images
                     const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
-                    console.log('thumbnailElement: ', thumbnailElement)
                     if (thumbnailElement) {
                         thumbnailElement.remove();
 
@@ -666,7 +655,6 @@ function render_image_widget($config)
                         savedImages.splice(currentSavedIndex, 1);
 
                         // Then delete it from the server.
-                        console.log('DELETE IMAGE>?: ', imgURLToDelete);
                         if (typeof imgURLToDelete === 'string') {
                             deleteFromServer(imgURLToDelete);
                         }
