@@ -118,6 +118,9 @@ function render_image_widget($config)
             let originalWidth, originalHeight;
             let hasRotateEventAdded = false;
 
+            let currentSelectedSavedIndex = null;
+            let currentSelectedUnsavedIndex = null;
+
             let selectedImages = []; // An array to store selected images
             let selectedImageIndex = null
             let originalImage = null; 
@@ -204,7 +207,7 @@ function render_image_widget($config)
             }
 
             function start(imageElement, index) {
-                currentUnsavedIndex = index;
+                // currentUnsavedIndex = index;
                 originalImage = imageElement;  // Set the original image
                 selectedImageIndex = index;
                 const ctx = canvas.getContext('2d');
@@ -288,15 +291,6 @@ function render_image_widget($config)
                 const croppedCanvas = document.createElement('canvas');
                 const ctx = croppedCanvas.getContext('2d');
 
-                // croppedCanvas.width = originalImage.naturalWidth;
-                // croppedCanvas.height = originalImage.naturalHeight;
-
-
-                // ctx.drawImage(
-                //     originalImage,
-                //     sourceX, sourceY, sourceWidth, sourceHeight,
-                //     0, 0, originalImage.naturalWidth, originalImage.naturalHeight
-                // );
                 croppedCanvas.width = sourceWidth;
                 croppedCanvas.height = sourceHeight;
 
@@ -314,6 +308,15 @@ function render_image_widget($config)
                         thumbnail.src = reader.result;
                         thumbnail.width = 100;
                         thumbnail.maxHeight = 100;
+                        console.log('selectedindex: ', selectedImageIndex);
+                        console.log('currentUnsavedIndex: ', currentUnsavedIndex);
+                        // if(currentUnsavedIndex) {
+                        //     thumbnail.dataset.index = currentUnsavedIndex;
+                        // } else if(selectedImageIndex) {
+                        //     thumbnail.dataset.index = selectedImageIndex;
+                        // } else {
+                        //     thumbnail.dataset.index = savedImages.length;
+                        // }
                         thumbnail.dataset.index = savedImages.length;
                         thumbnail.style.border = '2px solid blue'; // Blue border for saved
 
@@ -332,20 +335,28 @@ function render_image_widget($config)
                             // img.src = fullQualityImageSrc;
 
                             img.onload = function () {
-                                start(img);
+                                start(img, index);
                             };
                         });
-
-                        savedImages.push(blob);
-                        toggleVisibility();
-                        savedFullImages.push(reader.result);
-                        container.querySelector('#thumbnails').appendChild(thumbnail);
 
                         if (currentUnsavedIndex !== null) {
                             unsavedThumbnails.splice(currentUnsavedIndex, 1);
                             renderUnsavedThumbnails();
                             currentUnsavedIndex = null;
                         }
+
+                        // if (currentSelectedSavedIndex !== null) {
+                        //     savedImages[currentSelectedSavedIndex] = img;
+                        //     // Call API to replace image on the server here.
+                        //     currentSelectedSavedIndex = null;
+                        // } else {
+                        //     savedImages.push(img);
+                        // }
+                        savedImages.push(blob);
+                        savedFullImages.push(reader.result);
+
+                        toggleVisibility();
+                        container.querySelector('#thumbnails').appendChild(thumbnail);
                     };
                     reader.readAsDataURL(blob);
                 }, 'image/jpeg', 1);
@@ -398,11 +409,18 @@ function render_image_widget($config)
                         // img.src = fullQualityImageSrc;
                         
                         img.onload = function() {
-                            start(img);
+                            start(img, index);
                         };
                     });
 
-                    savedImages.push(blob);
+                    // savedImages.push(blob);
+                    if (currentSelectedSavedIndex !== null) {
+                        savedImages[currentSelectedSavedIndex] = img;
+                        // Call API to replace image on the server here.
+                        currentSelectedSavedIndex = null;
+                    } else {
+                        savedImages.push(blob);
+                    }
                     toggleVisibility();
                     savedFullImages.push(croppedCanvas.toDataURL());
                     container.querySelector('#thumbnails').appendChild(thumbnail);
@@ -448,6 +466,10 @@ function render_image_widget($config)
                             selectedImages.push(img);
                             unsavedThumbnails.push(img);
                             renderUnsavedThumbnails();
+
+
+                            currentUnsavedIndex = unsavedThumbnails.length - 1;
+
                             
                             // start(img, selectedImages.length - 1); // Auto-populate canvas
                             start(img, unsavedThumbnails.length - 1); 
@@ -481,8 +503,19 @@ function render_image_widget($config)
                                 container.querySelector('#image').value = '';
                                 return;
                             }
-                            unsavedThumbnails.push(img);
+                            // unsavedThumbnails.push(img);
                             selectedImages.push(img);
+
+                            // if (currentSelectedUnsavedIndex !== null) {
+                            //     unsavedThumbnails[currentSelectedUnsavedIndex] = img;
+                            //     currentSelectedUnsavedIndex = null;
+                            // } else {
+                            // }
+
+                            currentUnsavedIndex = unsavedThumbnails.length - 1
+                            unsavedThumbnails.push(img);
+
+
                             renderUnsavedThumbnails();
                             start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
                         };
@@ -502,6 +535,7 @@ function render_image_widget($config)
                     thumbnail.style.border = '2px solid red'; // Red border for unsaved
                     thumbnail.addEventListener('click', function() {
                         const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
+                        currentSelectedUnsavedIndex = index;
                         start(originalImage, index); // Pass the actual original image object
                     });
                     unsavedArea.appendChild(thumbnail);
@@ -708,9 +742,6 @@ function render_image_widget($config)
                 });
             }
 
-
-
-
             function fetchExistingFiles() {
                 // let filePath = '<?php echo $file_path; ?>';
                 fetch(`fetch_images.php?path=${file_path}`)
@@ -728,8 +759,6 @@ function render_image_widget($config)
                 const savedArea = container.querySelector('#thumbnails');
                 savedArea.innerHTML = '';
                 savedImages.forEach((imgURL, index) => {
-
-
                     const thumbnail = new Image();
                     thumbnail.src = imgURL;
                     thumbnail.width = 100;
@@ -737,6 +766,7 @@ function render_image_widget($config)
                     thumbnail.addEventListener('click', function() {
                         index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
+                        currentSelectedSavedIndex = index;
                         currentSavedIndex = index; // Update the currentSavedIndex
 
                         start(thumbnail, index);
