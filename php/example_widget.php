@@ -15,7 +15,7 @@ $config2 = [
     'min_width' => 100,
     'min_height' => 100,
     'max_photos' => 1,
-    'file_path' => 'downloads/',
+    'file_path' => 'icons/',
     'theme' => 'light'
 ];
 render_image_widget($config);
