@@ -4,30 +4,30 @@ function countFilesInDirectory($dir) {
     return count($files);
 }
 
-function generateUniqueFilename($filePath, $fileName) {
-    $uniqueName = $fileName;
-    $count = 1;
-
-    while (file_exists($filePath . $uniqueName)) {
+function generateUniqueFilename($filePath, $fileName, $maxPhotos, $id) {
+    if ($maxPhotos == 1) {
+        return $id . '.jpg';  // Assuming all images are JPEGs; modify as needed
+    } else {
+        $count = 1;
         $pathInfo = pathinfo($fileName);
-        $uniqueName = $pathInfo['filename'] . '-' . $count . '.' . $pathInfo['extension'];
-        $count++;
-    }
+        
+        while (file_exists($filePath . $count . '.' . $pathInfo['extension'])) {
+            $count++;
+        }
 
-    return $uniqueName;
+        return $count . '.' . $pathInfo['extension'];
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Validate JSON payload
-    if (!isset($data['images'], $data['path'], $data['max_photos'], $data['fileNames'])) {
+    if (!isset($data['images'], $data['path'], $data['max_photos'])) {
         echo json_encode(["status" => "invalid_payload"]);
         exit;
     }
-
     $images = $data['images'];
-    $fileNames = $data['fileNames'];
     $filePath = $data['path'];
 
     // Check if directory exists, create if not
@@ -36,24 +36,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $maxPhotos = $data['max_photos'];
+
     $existingFilesCount = countFilesInDirectory($filePath);
 
     if ($existingFilesCount >= $maxPhotos) {
         echo json_encode(["status" => "limit_reached"]);
         exit;
     }
+    
+    $id = 12345;
 
     foreach ($images as $index => $imageData) {
         $imageData = str_replace('data:image/jpeg;base64,', '', $imageData);
         $imageData = str_replace(' ', '+', $imageData);
         $data = base64_decode($imageData);
-        $uniqueFile = generateUniqueFilename($filePath, $fileNames[$index] ?? "image{$index}.jpg");
+        $uniqueFile = generateUniqueFilename($filePath, $fileNames[$index] ?? "image{$index}.jpg", $maxPhotos, $id);
         $file = $filePath . $uniqueFile;
         file_put_contents($file, $data);
     }
-
     echo json_encode(["status" => "success"]);
 } else {
     echo json_encode(["status" => "invalid_request"]);
 }
 ?>
+
