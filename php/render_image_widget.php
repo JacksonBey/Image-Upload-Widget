@@ -48,10 +48,10 @@ function render_image_widget($config)
             <div class="button-container" style="display:none;">
                 <button type="button" class="standard-button" id="cancel">Cancel</button>
                 <button type="button" class="standard-button" id="delete">Delete</button>
-                <button type="button" class="standard-button" id="crop">Crop</button>
+                <!-- <button type="button" class="standard-button" id="crop">Crop</button> -->
                 <button id="rotateClockwise" class="standard-button">Rotate Clockwise</button>
                 <button id="rotateCounterClockwise" class="standard-button">Rotate Counter Clockwise</button>
-                <button id="save" class="standard-button">Save without crop</button>
+                <button id="save" class="standard-button">Save</button>
 
             </div>
             <div>
@@ -144,7 +144,7 @@ function render_image_widget($config)
             const tooltip = container.querySelector('.crop-tooltip');
 
             function initializeEventListeners() {
-                cropBtn.addEventListener('click', cropAndSave);
+                // cropBtn.addEventListener('click', cropAndSave);
                 cancelBtn.addEventListener('click', cancelImage);
                 saveBtn.addEventListener('click', function() {
                     saveImage();
@@ -292,278 +292,7 @@ function render_image_widget($config)
                 buttonContainer.style.display = 'none';
                 canvas.style.visibility = 'hidden';
                 imageInput.value = '';
-            }
-
-            // function cropAndSave() {
-            //     if (!cropper || !originalImage) {
-            //         console.log("Errdddddddddddddddddddddddddddddddddddddddddor: Cropper not initialized or original image not set.");
-            //         return;
-            //     }
-
-            //     const cropData = cropper.getData();
-            //     const rotateData = cropData.rotate; // Cropper.js gives the rotation angle
-
-            //     let scaleX = originalImage.naturalWidth / canvas.width;
-            //     let scaleY = originalImage.naturalHeight / canvas.height;
-
-            //     let sourceX = Math.round((cropData.x + globalDx) * scaleX);
-            //     let sourceY = Math.round((cropData.y + globalDy) * scaleY);
-            //     let correctedSourceX = Math.round((cropData.x - globalDx) * scaleX);
-            //     let correctedSourceY = Math.round((cropData.y - globalDy) * scaleY);
-
-            //     let maxSourceX = originalImage.naturalWidth;
-            //     let maxSourceY = originalImage.naturalHeight;
-
-            //     let sourceWidth = Math.round(cropData.width * scaleX);
-            //     let sourceHeight = Math.round(cropData.height * scaleY);
-
-            //     if (correctedSourceX + sourceWidth > maxSourceX) {
-            //         sourceWidth = maxSourceX - correctedSourceX;
-            //     }
-
-            //     if (correctedSourceY + sourceHeight > maxSourceY) {
-            //         sourceHeight = maxSourceY - correctedSourceY;
-            //     }
-
-            //     const croppedCanvas = document.createElement('canvas');
-            //     const ctx = croppedCanvas.getContext('2d');
-
-            //     croppedCanvas.width = sourceWidth;
-            //     croppedCanvas.height = sourceHeight;
-
-
-            //     // if (rotateData) {
-            //     //     ctx.save();
-            //     //     ctx.translate(croppedCanvas.width / 2, croppedCanvas.height / 2);
-            //     //     ctx.rotate((Math.PI / 180) * rotateData);
-            //     //     ctx.translate(-croppedCanvas.width / 2, -croppedCanvas.height / 2);
-            //     // }
-            //     console.log("Rotation data before:", rotateData);
-            //     console.log("Cropping data before:", cropData);
-
-            //     console.log('BEFORE ROTATION:')
-            //     console.log("Canvas Width:", canvas.width, "Canvas Height:", canvas.height);
-            //     console.log("Original Image Width:", originalImage.naturalWidth, "Original Image Height:", originalImage.naturalHeight);
-            //     console.log("sourceX:", sourceX, "sourceY:", sourceY, "sourceWidth:", sourceWidth, "sourceHeight:", sourceHeight);
-
-
-            //     // Capture the pre-existing offsets
-            //     let offsetX = sourceX;
-            //     let offsetY = sourceY;
-
-            //     switch (rotateData) {
-            //     case 90:
-            //     case -270:
-            //         sourceX = originalImage.naturalHeight - offsetY - sourceHeight;
-            //         sourceY = offsetX;
-            //         [sourceWidth, sourceHeight] = [sourceHeight, sourceWidth];
-            //         break;
-
-            //     case -90:
-            //     case 270:
-            //         sourceX = offsetY;
-            //         sourceY = originalImage.naturalWidth - offsetX - sourceWidth;
-            //         [sourceWidth, sourceHeight] = [sourceHeight, sourceWidth];
-            //         break;
-
-            //     case 180:
-            //     case -180:
-            //         sourceX = originalImage.naturalWidth - offsetX - sourceWidth;
-            //         sourceY = originalImage.naturalHeight - offsetY - sourceHeight;
-            //         break;
-
-            //     default:
-            //         // No rotation, no change needed
-            //         break;
-            //     }
-
-            //     // Make sure sourceX, sourceY, sourceWidth, and sourceHeight are within valid bounds
-            //     // sourceX = Math.max(0, Math.min(sourceX, originalImage.naturalWidth - sourceWidth));
-            //     // sourceY = Math.max(0, Math.min(sourceY, originalImage.naturalHeight - sourceHeight));
-
-            //     sourceX = offsetY;
-            //     sourceY = offsetX;
-
-
-
-
-            //     console.log('AFTERdddd ROTATION:')
-            //     console.log("Canvas Width:", canvas.width, "Canvas Height:", canvas.height);
-            //     console.log("Original Image Width:", originalImage.naturalWidth, "Original Image Height:", originalImage.naturalHeight);
-            //     console.log("sourceX:", sourceX, "sourceY:", sourceY, "sourceWidth:", sourceWidth, "sourceHeight:", sourceHeight);
-
-
-
-            //     ctx.drawImage(
-            //         originalImage,
-            //         sourceX, sourceY, sourceWidth, sourceHeight,
-            //         0, 0, sourceWidth, sourceHeight
-            //     );
-            //     ctx.strokeStyle = "#FF0000"; // Red
-            //     ctx.strokeRect(sourceX, sourceY, sourceWidth, sourceHeight);
-
-
-            //     // if (rotateData) {
-            //     //     ctx.restore();  // Restore the canvas state if rotated
-            //     // }
-
-            //     const rotationCanvas = document.createElement('canvas');
-            //     rotationCanvas.width = croppedCanvas.width;
-            //     rotationCanvas.height = croppedCanvas.height;
-            //     const rotationCtx = rotationCanvas.getContext('2d');
-            //     console.log('AFTER ROTATION:')
-            //     console.log("Canvas Width:", canvas.width, "Canvas Height:", canvas.height);
-            //     console.log("Original Image Width:", originalImage.naturalWidth, "Original Image Height:", originalImage.naturalHeight);
-            //     console.log("sourceX:", sourceX, "sourceY:", sourceY, "sourceWidth:", sourceWidth, "sourceHeight:", sourceHeight);
-
-
-            //     croppedCanvas.toBlob(function(croppedBlob) {
-            //         const croppedImage = new Image();
-            //         croppedImage.onload = () => {
-            //             const rotationCanvas = document.createElement('canvas');
-            //             rotationCanvas.width = croppedCanvas.width;
-            //             rotationCanvas.height = croppedCanvas.height;
-            //             const rotationCtx = rotationCanvas.getContext('2d');
-
-            //             rotationCtx.drawImage(croppedImage, 0, 0);  // Draw the cropped image
-
-            //             rotationCtx.save();  // Save the current state before rotating
-            //             rotationCtx.clearRect(0, 0, rotationCanvas.width, rotationCanvas.height);  // Clear the canvas
-
-            //             rotationCtx.translate(rotationCanvas.width / 2, rotationCanvas.height / 2);  // Translate to the center
-            //             rotationCtx.rotate((Math.PI / 180) * rotateData);  // Rotate
-            //             rotationCtx.translate(-rotationCanvas.width / 2, -rotationCanvas.height / 2);  // Translate back
-
-            //             rotationCtx.drawImage(croppedImage, 0, 0);  // Draw the rotated image
-            //             rotationCtx.restore();  // Restore the original state
-
-            //             // Now save this newly rotated image
-            //             rotationCanvas.toBlob(function(rotatedBlob) {
-            //                 const thumbnail = document.createElement('img');
-            //                 const reader = new FileReader();
-            //                 reader.onload = function () {
-            //                     thumbnail.src = reader.result;
-            //                     thumbnail.width = 100;
-            //                     thumbnail.maxHeight = 100;
-            //                     // console.log('selectedindex: ', selectedImageIndex);
-            //                     // console.log('currentUnsavedIndex: ', currentUnsavedIndex);
-            //                     // if(currentUnsavedIndex) {
-            //                     //     thumbnail.dataset.index = currentUnsavedIndex;
-            //                     // } else if(selectedImageIndex) {
-            //                     //     thumbnail.dataset.index = selectedImageIndex;
-            //                     // } else {
-            //                     //     thumbnail.dataset.index = savedImages.length;
-            //                     // }
-            //                     // console.log('savedImages.length: ', savedImages.length);
-            //                     // console.log('SETTING INDEX')
-
-            //                     const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
-            //                     console.log('existingThumbnail?: ', existingThumbnail);
-            //                     console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
-            //                     if(existingThumbnail === null){
-            //                         console.log('!existingThumbnail')
-            //                         savedImages.push(rotatedBlob);
-            //                         savedFileNames.push(null);
-            //                         savedFullImages.push(reader.result);
-            //                         thumbnail.dataset.index = savedImages.length -1;
-
-
-            //                     } else {
-            //                         savedImages[currentSelectedSavedIndex] = rotatedBlob;
-            //                         thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
-            //                         savedFullImages[currentSelectedSavedIndex] = reader.result;
-
-            //                     }
-            //                     thumbnail.style.border = '2px solid blue'; // Blue border for saved
-            //                     thumbnail.addEventListener('click', function () {
-            //                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-            //                         console.log('THUMB CLICK! index: ', index)
-
-            //                         const fullQualityImageSrc = savedFullImages[index];
-            //                         currentSavedIndex = index; // Update the currentSavedIndex
-            //                         currentSelectedSavedIndex = index;
-
-            //                         const img = new Image();
-            //                         if (typeof fullQualityImageSrc === 'string') {
-            //                             // Handle URLs
-            //                             img.src = fullQualityImageSrc;
-            //                         } else if (fullQualityImageSrc instanceof Blob) {
-            //                             // Handle Blobs
-            //                             img.src = URL.createObjectURL(fullQualityImageSrc);
-            //                         }
-            //                         // img.src = fullQualityImageSrc;
-
-            //                         img.onload = function () {
-            //                             start(img, index);
-            //                         };
-            //                     });
-
-            //                     if (currentUnsavedIndex !== null) {
-            //                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
-            //                         renderUnsavedThumbnails();
-            //                         currentUnsavedIndex = null;
-            //                     }
-
-            //                     if (currentSelectedSavedIndex !== null) {
-            //                         // Only replace if a file with this index already exists
-            //                         console.log('SAVED FILE NAMES: ', savedFileNames);
-            //                         console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
-            //                         if(savedFileNames[currentSelectedSavedIndex]) {
-            //                             // Update blob in savedImages
-            //                             savedImages[currentSelectedSavedIndex] = blob;
-
-            //                             // Retrieve existing file name
-            //                             const existingFileName = savedFileNames[currentSelectedSavedIndex];
-
-            //                             const xhr = new XMLHttpRequest();
-            //                             xhr.open('POST', 'replace_image.php', true);
-            //                             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-            //                             xhr.onreadystatechange = function() {
-            //                                 if (xhr.readyState === 4 && xhr.status === 200) {
-            //                                     const response = JSON.parse(xhr.responseText);
-            //                                     if (response.success) {
-            //                                         console.log('Image replaced successfully.');
-            //                                     } else {
-            //                                         console.error('Failed to replace image:', response.message);
-            //                                     }
-            //                                 }
-            //                             };
-
-            //                             const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
-            //                             xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
-
-            //                         } 
-
-
-
-
-            //                     }
-            //                     if(existingThumbnail === null) {
-            //                         console.log('PUSHING')
-            //                         container.querySelector('#thumbnails').appendChild(thumbnail);
-            //                     } else {
-            //                         existingThumbnail.replaceWith(thumbnail);
-            //                     }
-            //                     // savedImages.push(blob);
-            //                     toggleVisibility();
-            //                 };
-            //                 reader.readAsDataURL(rotatedBlob);
-            //                 // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
-            //                 // currentSelectedSavedIndex = null;
-            //             }, 'image/jpeg', 1);
-            //         };
-            //         croppedImage.src = URL.createObjectURL(croppedBlob);
-            //     });
-            //     // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
-            //     // currentSelectedSavedIndex = null;
-            //     cropper.destroy();
-            //     buttonContainer.style.display = 'none';
-            //     canvas.style.visibility = 'hidden';
-            //     downloadBtn.style.display = 'block';
-            //     imageInput.value = '';
-            // }
-
+            } 
 
             function cropAndSave() {
                 if (!cropper || !originalImage) {
@@ -572,7 +301,7 @@ function render_image_widget($config)
                 }
 
                 const cropData = cropper.getData();
-                const rotateData = cropData.rotate; // Cropper.js gives the rotation angle
+
                 let scaleX = originalImage.naturalWidth / canvas.width;
                 let scaleY = originalImage.naturalHeight / canvas.height;
 
@@ -590,144 +319,92 @@ function render_image_widget($config)
                 ctx.drawImage(originalImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
 
                 // Convert cropped canvas to Blob
-                croppedCanvas.toBlob(function(croppedBlob) {
-                    // Create an image from the Blob
-                    const croppedImage = new Image();
-                    croppedImage.src = URL.createObjectURL(croppedBlob);
-                    croppedImage.onload = () => {
-                        const rotationCanvas = document.createElement('canvas');
-  
-  // Adjust canvas size based on rotation angle
-  if (rotateData === 90 || rotateData === 270) {
-      rotationCanvas.width = sourceHeight;
-      rotationCanvas.height = sourceWidth;
-  } else {
-      rotationCanvas.width = sourceWidth;
-      rotationCanvas.height = sourceHeight;
-  }
+                croppedCanvas.toBlob(function(blob) {
+                    const thumbnail = document.createElement('img');
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        thumbnail.src = reader.result;
+                        thumbnail.width = 100;
+                        thumbnail.maxHeight = 100;
 
-  const rotationCtx = rotationCanvas.getContext('2d');
-
-  // Clear existing canvas
-  rotationCtx.clearRect(0, 0, rotationCanvas.width, rotationCanvas.height);
-
-  // Move origin to center of canvas
-  rotationCtx.translate(rotationCanvas.width / 2, rotationCanvas.height / 2);
-
-  // Rotate canvas
-  rotationCtx.rotate((Math.PI / 180) * rotateData);
-
-  // Draw the image so its center aligns with the canvas origin
-  if (rotateData === 90 || rotateData === 270) {
-      rotationCtx.drawImage(croppedImage, -sourceHeight / 2, -sourceWidth / 2, sourceHeight, sourceWidth);
-  } else {
-      rotationCtx.drawImage(croppedImage, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
-  }
-
-                        
-                        // Convert rotated canvas to Blob and save, or whatever you want to do next
-                        rotationCanvas.toBlob(function(rotatedBlob) {
-                            const thumbnail = document.createElement('img');
-                            const reader = new FileReader();
-                            reader.onload = function () {
-                                thumbnail.src = reader.result;
-                                thumbnail.width = 100;
-                                thumbnail.maxHeight = 100;
-
-                                const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
-                                console.log('existingThumbnail?: ', existingThumbnail);
-                                console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
-                                if(existingThumbnail === null){
-                                    console.log('!existingThumbnail')
-                                    savedImages.push(rotatedBlob);
-                                    savedFileNames.push(null);
-                                    savedFullImages.push(reader.result);
-                                    thumbnail.dataset.index = savedImages.length -1;
+                        const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
+                        if(existingThumbnail === null){
+                            savedImages.push(blob);
+                            savedFileNames.push(null);
+                            savedFullImages.push(reader.result);
+                            thumbnail.dataset.index = savedImages.length -1;
 
 
-                                } else {
-                                    savedImages[currentSelectedSavedIndex] = rotatedBlob;
-                                    thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
-                                    savedFullImages[currentSelectedSavedIndex] = reader.result;
+                        } else {
+                            savedImages[currentSelectedSavedIndex] = blob;
+                            thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
+                            savedFullImages[currentSelectedSavedIndex] = reader.result;
 
-                                }
-                                thumbnail.style.border = '2px solid blue'; // Blue border for saved
-                                thumbnail.addEventListener('click', function () {
-                                    totalRotation = 0
-                                    const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-                                    console.log('THUMB CLICK! index: ', index)
+                        }
+                        thumbnail.style.border = '2px solid blue'; // Blue border for saved
+                        thumbnail.addEventListener('click', function () {
+                            totalRotation = 0
+                            const index = parseInt(this.dataset.index); // Retrieve index from data attribute
 
-                                    const fullQualityImageSrc = savedFullImages[index];
-                                    currentSavedIndex = index; // Update the currentSavedIndex
-                                    currentSelectedSavedIndex = index;
+                            const fullQualityImageSrc = savedFullImages[index];
+                            currentSavedIndex = index; // Update the currentSavedIndex
+                            currentSelectedSavedIndex = index;
 
-                                    const img = new Image();
-                                    if (typeof fullQualityImageSrc === 'string') {
-                                        // Handle URLs
-                                        img.src = fullQualityImageSrc;
-                                    } else if (fullQualityImageSrc instanceof Blob) {
-                                        // Handle Blobs
-                                        img.src = URL.createObjectURL(fullQualityImageSrc);
-                                    }
-                                    // img.src = fullQualityImageSrc;
+                            const img = new Image();
+                            if (typeof fullQualityImageSrc === 'string') {
+                                // Handle URLs
+                                img.src = fullQualityImageSrc;
+                            } else if (fullQualityImageSrc instanceof Blob) {
+                                // Handle Blobs
+                                img.src = URL.createObjectURL(fullQualityImageSrc);
+                            }
 
-                                    img.onload = function () {
-                                        start(img, index);
-                                    };
-                                });
-
-                                if (currentUnsavedIndex !== null) {
-                                    unsavedThumbnails.splice(currentUnsavedIndex, 1);
-                                    renderUnsavedThumbnails();
-                                    currentUnsavedIndex = null;
-                                }
-
-                                if (currentSelectedSavedIndex !== null) {
-                                    // Only replace if a file with this index already exists
-                                    console.log('SAVED FILE NAMES: ', savedFileNames);
-                                    console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
-                                    if(savedFileNames[currentSelectedSavedIndex]) {
-                                        // Update blob in savedImages
-                                        savedImages[currentSelectedSavedIndex] = blob;
-
-                                        // Retrieve existing file name
-                                        const existingFileName = savedFileNames[currentSelectedSavedIndex];
-
-                                        const xhr = new XMLHttpRequest();
-                                        xhr.open('POST', 'replace_image.php', true);
-                                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                                        xhr.onreadystatechange = function() {
-                                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                                const response = JSON.parse(xhr.responseText);
-                                                if (response.success) {
-                                                    console.log('Image replaced successfully.');
-                                                } else {
-                                                    console.error('Failed to replace image:', response.message);
-                                                }
-                                            }
-                                        };
-
-                                        const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
-                                        xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
-
-                                    } 
-                                }
-                                if(existingThumbnail === null) {
-                                    console.log('PUSHING')
-                                    container.querySelector('#thumbnails').appendChild(thumbnail);
-                                } else {
-                                    existingThumbnail.replaceWith(thumbnail);
-                                }
-                                toggleVisibility();
+                            img.onload = function () {
+                                start(img, index);
                             };
-                            // croppedImage.src = URL.createObjectURL(croppedBlob);
-                            reader.readAsDataURL(rotatedBlob);
-                        }, 'image/jpeg', 1);
+                        });
+
+                        if (currentUnsavedIndex !== null) {
+                            unsavedThumbnails.splice(currentUnsavedIndex, 1);
+                            renderUnsavedThumbnails();
+                            currentUnsavedIndex = null;
+                        }
+
+                        if (currentSelectedSavedIndex !== null) {
+                            if(savedFileNames[currentSelectedSavedIndex]) {
+                                savedImages[currentSelectedSavedIndex] = blob;
+                                const existingFileName = savedFileNames[currentSelectedSavedIndex];
+
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('POST', 'replace_image.php', true);
+                                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                                xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === 4 && xhr.status === 200) {
+                                        const response = JSON.parse(xhr.responseText);
+                                        if (response.success) {
+                                            console.log('Image replaced successfully.');
+                                        } else {
+                                            console.error('Failed to replace image:', response.message);
+                                        }
+                                    }
+                                };
+
+                                const image_data = croppedCanvas.toDataURL('image/jpeg').split(',')[1];
+                                xhr.send(`file_path=${file_path}&file_name=${existingFileName}&image_data=${image_data}`);
+
+                            } 
+                        }
+                        if(existingThumbnail === null) {
+                            container.querySelector('#thumbnails').appendChild(thumbnail);
+                        } else {
+                            existingThumbnail.replaceWith(thumbnail);
+                        }
+                        toggleVisibility();
                     };
+                    reader.readAsDataURL(blob);
                 }, 'image/jpeg', 1);
             }
-
 
 
 
@@ -751,12 +428,8 @@ function render_image_widget($config)
 
                     thumbnail.src = croppedCanvas.toDataURL();
                     thumbnail.width = 100;
-                    console.log('savedImages.length: ', savedImages.length);
-                    console.log('savedImages BEFORE: ', savedImages);
-                    console.log('SETTING INDEX')
 
                     const existingThumbnail = container.querySelector(`#thumbnails > img[data-index='${currentSelectedSavedIndex}']`);
-                    console.log('existingThumbnail?: ', existingThumbnail);
                     if(existingThumbnail === null){
                         savedImages.push(blob);
                         savedFileNames.push(null);
@@ -765,17 +438,14 @@ function render_image_widget($config)
 
 
                     } else {
-                        console.log('CURRENTselectedSavedIndex: ', currentSelectedSavedIndex);
                         thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
                         savedImages[currentSelectedSavedIndex] = blob;
                         savedFullImages[currentSelectedSavedIndex] = croppedCanvas.toDataURL();
                     }
-                    console.log('savedImages.length AFTER: ', savedImages.length);
                     thumbnail.style.border = '2px solid blue'; // Blue border for saved
                     thumbnail.addEventListener('click', function() {
                         totalRotation = 0
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
-                        console.log('THUMB CLICK! index: ', index)
                         const fullQualityImageSrc = savedFullImages[index];
 
                         currentSelectedSavedIndex = index;
@@ -788,22 +458,12 @@ function render_image_widget($config)
                             // Handle Blobs
                             img.src = URL.createObjectURL(fullQualityImageSrc);
                         }
-                        // img.src = fullQualityImageSrc;
                         
                         img.onload = function() {
                             start(img, index);
                         };
                     });
-
-
-                    // savedImages.push(blob);
-                    // if (currentSelectedSavedIndex !== null) {
-                    //     savedImages[currentSelectedSavedIndex] = blob;
-                    //     savedFileNames[currentSelectedSavedIndex] = `temp`;  // Update file name if needed
-                    console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
                     if (currentSelectedSavedIndex !== null) {
-                        console.log('SAVED FILE NAMES: ', savedFileNames);
-                        console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex);
                         // Only replace if a file with this index already exists
                         if(savedFileNames[currentSelectedSavedIndex]) {
                             // Update blob in savedImages
@@ -841,7 +501,6 @@ function render_image_widget($config)
                     } else {
                         // Generate a new file name (you can modify this logic as needed)
                         // const newFileName = `temp_${savedFileNames.length + 1}.jpg`;
-                        console.log('PUSHING')
                         
                         // Push blob and filename
                         // savedImages.push(blob);
@@ -856,7 +515,6 @@ function render_image_widget($config)
                         renderUnsavedThumbnails();
                         currentUnsavedIndex = null;
                     }
-                    // console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
                     // currentSelectedSavedIndex = null;
                 }, 'image/jpeg', 1);
 
@@ -872,7 +530,6 @@ function render_image_widget($config)
                 totalRotation = 0
                 e.preventDefault();
 
-                console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
                 currentSelectedSavedIndex = null;
 
                 const files = e.dataTransfer.files;
@@ -900,12 +557,7 @@ function render_image_widget($config)
                             selectedImages.push(img);
                             unsavedThumbnails.push(img);
                             renderUnsavedThumbnails();
-
-
                             currentUnsavedIndex = unsavedThumbnails.length - 1;
-
-                            
-                            // start(img, selectedImages.length - 1); // Auto-populate canvas
                             start(img, unsavedThumbnails.length - 1); 
                         };
                     };
@@ -918,7 +570,6 @@ function render_image_widget($config)
                 const files = event.target.files;
                 const filesArray = Array.from(files);
 
-                console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
                 currentSelectedSavedIndex = null;
 
                 if (savedImages.length + filesArray.length > max_photos) {
@@ -942,19 +593,9 @@ function render_image_widget($config)
                                 container.querySelector('#image').value = '';
                                 return;
                             }
-                            // unsavedThumbnails.push(img);
                             selectedImages.push(img);
-
-                            // if (currentSelectedUnsavedIndex !== null) {
-                            //     unsavedThumbnails[currentSelectedUnsavedIndex] = img;
-                            //     currentSelectedUnsavedIndex = null;
-                            // } else {
-                            // }
-
                             currentUnsavedIndex = unsavedThumbnails.length - 1
                             unsavedThumbnails.push(img);
-
-
                             renderUnsavedThumbnails();
                             start(img, unsavedThumbnails.length - 1); // Auto-populate canvas
                         };
@@ -970,15 +611,12 @@ function render_image_widget($config)
                     const thumbnail = new Image();
                     thumbnail.src = img.src;
                     thumbnail.width = 100;
-                    console.log('index in UNSAVED ', index);
-                        console.log('SETTING INDEX')
                     thumbnail.dataset.index = index;
                     thumbnail.style.border = '2px solid red'; // Red border for unsaved
                     thumbnail.addEventListener('click', function() {
                         totalRotation = 0
                         const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
                         currentSelectedUnsavedIndex = index;
-                        console.log('SETTING currentSelectedSavedIndex TO NULL: ', currentSelectedSavedIndex);
                         currentSelectedSavedIndex = null;
                         start(originalImage, index); // Pass the actual original image object
                     });
@@ -994,19 +632,13 @@ function render_image_widget($config)
                     const thumbnail = new Image();
                     thumbnail.src = imgURL;
                     thumbnail.width = 100;
-                    console.log('SAVED THUMB INDEX ', index);
-                        console.log('SETTING INDEX')
                     thumbnail.dataset.index = index;
                     thumbnail.addEventListener('click', function() {
                         totalRotation = 0
                         index = parseInt(this.dataset.index); // Retrieve index from data attribute
                         const fullQualityImageSrc = savedFullImages[index];
-
                         currentSelectedSavedIndex = index;
-                        console.log('SETTING currentSelectedSavedIndex: ', currentSelectedSavedIndex);
-
                         currentSavedIndex = index; // Update the currentSavedIndex
-
                         start(thumbnail, index);
                     });
                     savedArea.appendChild(thumbnail);
@@ -1032,7 +664,6 @@ function render_image_widget($config)
 
                 if (hasSavedImages !== newHasSavedImages) {
                     container.querySelector('#images-text').style.display = newHasSavedImages ? 'block' : 'none';
-                    // container.querySelector('#saved-thumbnails-text').style.display = newHasSavedImages ? 'block' : 'none';
                     hasSavedImages = newHasSavedImages;
                 }
 
@@ -1145,22 +776,15 @@ function render_image_widget($config)
                     const thumbnailElement = container.querySelector(`[data-index='${currentSavedIndex}']`);
                     if (thumbnailElement) {
                         thumbnailElement.remove();
-
-                        // Store the image URL before splicing.
                         const imgURLToDelete = savedImages[currentSavedIndex];
-
-                        // Then delete it from the server.
                         if (typeof imgURLToDelete === 'string') {
                             deleteFromServer(imgURLToDelete);
                         }
-
                         savedImages.splice(currentSavedIndex, 1);
                         savedFullImages.splice(currentSavedIndex, 1);
                         // Re-index remaining thumbnails
                         const remainingThumbnails = container.querySelectorAll('#thumbnails > img');
                         remainingThumbnails.forEach((thumbnail, index) => {
-                            console.log('savedImages.length: ', index);
-                        console.log('SETTING INDEX')
                             thumbnail.dataset.index = index;
                         });
 
@@ -1218,16 +842,11 @@ function render_image_widget($config)
                     .catch(error => console.error("Failed to fetch existing images:", error));
             }
 
-            // Main Execution
             function main() {
-                // Main function to execute the script
                 initializeEventListeners();
-                // fetchExistingFilesCount();
-
                 fetchExistingFiles();
             }
 
-            // Execute the main function when the document is ready
             document.addEventListener("DOMContentLoaded", main);
         })();
         </script>
