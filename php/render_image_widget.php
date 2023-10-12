@@ -422,6 +422,10 @@ function render_image_widget($config)
                     console.error("Error: croppedCanvas is null");
                     return;
                 }
+                //console log all variables used in this function:
+                console.log('SAVING')
+                console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex)
+                    console.log('CURRENT unsaved index (onsave): ', currentUnsavedIndex)
 
                 croppedCanvas.toBlob(function(blob) {
                     const thumbnail = document.createElement('img');
@@ -511,7 +515,8 @@ function render_image_widget($config)
                     }
                     toggleVisibility();
                     // renderSavedThumbnails();
-
+                    console.log('CURRENT SELECTED SAVED INDEX: ', currentSelectedSavedIndex)
+                    console.log('CURRENT unsaved index (onsave): ', currentUnsavedIndex)
                     if (currentUnsavedIndex !== null) {
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
                         renderUnsavedThumbnails();
@@ -614,10 +619,16 @@ function render_image_widget($config)
                     thumbnail.src = img.src;
                     thumbnail.width = 100;
                     thumbnail.dataset.index = index;
+                    console.log('SETTING THUMBNAIL INDEX: ', index)
                     thumbnail.style.border = '2px solid red'; // Red border for unsaved
                     thumbnail.addEventListener('click', function() {
+                        console.log('UNSAVED CL:ICK')
                         totalRotation = 0
                         const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
+                        console.log('INDEX: ', index)
+                        console.log('CURRENT SELECTED UNSAVED INDEX: ', currentSelectedUnsavedIndex)
+                        console.log('currentUnsavedIndex?: ' , currentUnsavedIndex)
+                        currentUnsavedIndex = index;
                         currentSelectedUnsavedIndex = index;
                         currentSelectedSavedIndex = null;
                         start(originalImage, index); // Pass the actual original image object
