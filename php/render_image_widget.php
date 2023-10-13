@@ -422,11 +422,6 @@ function render_image_widget($config)
                     console.error("Error: croppedCanvas is null");
                     return;
                 }
-                //console log all variables used in this function:
-                console.log('SAVING')
-                console.log('currentSelectedSavedIndex: ', currentSelectedSavedIndex)
-                    console.log('CURRENT unsaved index (onsave): ', currentUnsavedIndex)
-
                 croppedCanvas.toBlob(function(blob) {
                     const thumbnail = document.createElement('img');
 
@@ -439,14 +434,11 @@ function render_image_widget($config)
                         savedFileNames.push(null);
                         savedFullImages.push(croppedCanvas.toDataURL());
                         thumbnail.dataset.index = savedImages.length -1;
-
-
                     } else {
                         thumbnail.dataset.index = currentSelectedSavedIndex;  // Use existing index
                         savedImages[currentSelectedSavedIndex] = blob;
                         savedFullImages[currentSelectedSavedIndex] = croppedCanvas.toDataURL();
                     }
-                    thumbnail.style.border = '2px solid blue'; // Blue border for saved
                     thumbnail.addEventListener('click', function() {
                         totalRotation = 0
                         const index = parseInt(this.dataset.index); // Retrieve index from data attribute
@@ -497,7 +489,12 @@ function render_image_widget($config)
                             };
 
                             xhr.send(formData);
+                        } else {
+                            thumbnail.style.border = '2px solid blue'; // Blue border for saved
+                            downloadBtn.style.display = 'block';
+
                         }
+
                         // Find and replace the existing thumbnail element with the same data-index
                         if (existingThumbnail !== null) {
                             existingThumbnail.replaceWith(thumbnail);
@@ -505,31 +502,23 @@ function render_image_widget($config)
                         }
 
                     } else {
-                        // Generate a new file name (you can modify this logic as needed)
-                        // const newFileName = `temp_${savedFileNames.length + 1}.jpg`;
-                        
-                        // Push blob and filename
-                        // savedImages.push(blob);
-                        // savedFileNames.push(`temp`);
+                        thumbnail.style.border = '2px solid blue'; // Blue border for saved
+                downloadBtn.style.display = 'block';
+
                         container.querySelector('#thumbnails').appendChild(thumbnail);
                     }
                     toggleVisibility();
-                    // renderSavedThumbnails();
-                    console.log('CURRENT SELECTED SAVED INDEX: ', currentSelectedSavedIndex)
-                    console.log('CURRENT unsaved index (onsave): ', currentUnsavedIndex)
                     if (currentUnsavedIndex !== null) {
                         unsavedThumbnails.splice(currentUnsavedIndex, 1);
                         renderUnsavedThumbnails();
                         currentUnsavedIndex = null;
                     }
-                    // currentSelectedSavedIndex = null;
                 }, 'image/jpeg', 1);
 
 
                 cropper.destroy();
                 buttonContainer.style.display = 'none';
                 canvas.style.visibility = 'hidden';
-                downloadBtn.style.display = 'block';
                 imageInput.value = '';
             }
 
@@ -619,15 +608,10 @@ function render_image_widget($config)
                     thumbnail.src = img.src;
                     thumbnail.width = 100;
                     thumbnail.dataset.index = index;
-                    console.log('SETTING THUMBNAIL INDEX: ', index)
                     thumbnail.style.border = '2px solid red'; // Red border for unsaved
                     thumbnail.addEventListener('click', function() {
-                        console.log('UNSAVED CL:ICK')
                         totalRotation = 0
                         const originalImage = unsavedThumbnails[index]; // Access the original full-quality image from unsavedThumbnails
-                        console.log('INDEX: ', index)
-                        console.log('CURRENT SELECTED UNSAVED INDEX: ', currentSelectedUnsavedIndex)
-                        console.log('currentUnsavedIndex?: ' , currentUnsavedIndex)
                         currentUnsavedIndex = index;
                         currentSelectedUnsavedIndex = index;
                         currentSelectedSavedIndex = null;
