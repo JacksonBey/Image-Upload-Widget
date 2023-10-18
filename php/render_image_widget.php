@@ -692,6 +692,7 @@ function render_image_widget($config)
             }
 
             function deleteFromServer(imgURL) {
+                console.log('DELETING: ', imgURL)
                 fetch('delete_image.php', {
                     method: 'POST',
                     headers: {
@@ -702,7 +703,8 @@ function render_image_widget($config)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                    // Remove the image thumbnail from the page and other clean-up actions
+                        // Remove the image thumbnail from the page and other clean-up actions
+                        console.log('successfully deleted :', imgURL)
                     } else {
                     console.error('Failed to delete image:', data.message);
                     }
