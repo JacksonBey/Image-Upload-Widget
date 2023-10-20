@@ -581,7 +581,7 @@ function render_image_widget($config)
                                         };
                                         reader.readAsDataURL(blob);
                                     },
-                                    'image/jpeg',
+                                    blob.type,
                                 );
                             };
                             img.onerror = () => {

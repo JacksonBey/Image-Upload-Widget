@@ -47,13 +47,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = 12345;
 
     foreach ($images as $index => $imageData) {
-        $imageData = str_replace('data:image/jpeg;base64,', '', $imageData);
+        $extension = 'jpg';  // Default to JPEG
+        if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $matches)) {
+            $extension = $matches[1];
+        }
+    
+        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
         $imageData = str_replace(' ', '+', $imageData);
         $data = base64_decode($imageData);
-        $uniqueFile = generateUniqueFilename($filePath, $fileNames[$index] ?? "image{$index}.jpg", $maxPhotos, $id);
+    
+        // Check if the image is a PNG; otherwise, convert it to JPEG
+        if ($extension === 'png') {
+            $uniqueFile = generateUniqueFilename($filePath, $fileNames[$index] ?? "image{$index}.png", $maxPhotos, $id);
+        } else {
+            $uniqueFile = generateUniqueFilename($filePath, $fileNames[$index] ?? "image{$index}.jpg", $maxPhotos, $id);
+            $extension = 'jpg';
+        }
+    
         $file = $filePath . $uniqueFile;
         file_put_contents($file, $data);
     }
+    
     echo json_encode(["status" => "success"]);
 } else {
     echo json_encode(["status" => "invalid_request"]);

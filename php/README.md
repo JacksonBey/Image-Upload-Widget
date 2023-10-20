@@ -33,6 +33,14 @@ This JavaScript / jQuery Image Upload Widget is a versatile, fully-featured imag
 - PHP 7.x or higher
 - A web server (e.g., Apache, Nginx)
 
+## Starting the PHP Server
+
+To run the widget, start the PHP built-in web server by executing the following command in the terminal:
+
+```bash
+php -S localhost:8000
+```
+
 ## Installation
 
 1. Download the `/php` directory from the project repository.
