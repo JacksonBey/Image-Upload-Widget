@@ -5,17 +5,17 @@ function countFilesInDirectory($dir) {
 }
 
 function generateUniqueFilename($filePath, $fileName, $maxPhotos, $id) {
+    $pathInfo = pathinfo($fileName);
+    $extension = $pathInfo['extension'];
+    
     if ($maxPhotos == 1) {
-        return $id . '.jpg';  // Assuming all images are JPEGs; modify as needed
+        return $id . '.' . $extension;
     } else {
-        $count = 1;
-        $pathInfo = pathinfo($fileName);
-        
-        while (file_exists($filePath . $count . '.' . $pathInfo['extension'])) {
+        $count = 1;        
+        while (file_exists($filePath . $count . '.' . $extension)) {
             $count++;
         }
-
-        return $count . '.' . $pathInfo['extension'];
+        return $count . '.' . $extension;
     }
 }
 
