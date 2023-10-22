@@ -127,6 +127,7 @@ function render_image_widget($config)
             let globalDx = 0;
             let globalDy = 0;
             let savedFileNames = [];
+            let imageType = null;
 
 
             // DOM Elements
@@ -308,6 +309,7 @@ function render_image_widget($config)
                     console.error("Error: croppedCanvas is null");
                     return;
                 }
+                const saveImageType = imageType === 'image/png' ? 'image/png' : 'image/jpeg';
                 croppedCanvas.toBlob(function(blob) {
                     const thumbnail = document.createElement('img');
 
@@ -340,8 +342,11 @@ function render_image_widget($config)
                             // Handle Blobs
                             img.src = URL.createObjectURL(fullQualityImageSrc);
                         }
+
+
                         
                         img.onload = function() {
+
                             start(img, index);
                         };
                     });
@@ -389,7 +394,7 @@ function render_image_widget($config)
 
                     } else {
                         thumbnail.style.border = '2px solid blue'; // Blue border for saved
-                downloadBtn.style.display = 'block';
+                    downloadBtn.style.display = 'block';
 
                         container.querySelector('#thumbnails').appendChild(thumbnail);
                     }
@@ -399,7 +404,7 @@ function render_image_widget($config)
                         renderUnsavedThumbnails();
                         currentUnsavedIndex = null;
                     }
-                }, 'image/jpeg', 1);
+                }, saveImageType);
 
 
                 cropper.destroy();
@@ -431,6 +436,7 @@ function render_image_widget($config)
                         const img = new Image();
                         img.src = e.target.result;
                         img.onload = function() {
+                            imageType = img.src.substring("data:".length, img.src.indexOf(";base64"));
                             const validation = validateImage(img);
                             if (!validation.isValid) {
                                 alert(validation.error);
@@ -469,6 +475,7 @@ function render_image_widget($config)
                         const img = new Image();
                         img.src = e.target.result;
                         img.onload = function() {
+                            imageType = img.src.substring("data:".length, img.src.indexOf(";base64"));
                             const validation = validateImage(img);
                             if (!validation.isValid) {
                                 alert(validation.error);
@@ -568,7 +575,6 @@ function render_image_widget($config)
                                 canvas.height = img.naturalHeight;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0);
-                                
                                 canvas.toBlob(
                                     blob => {
                                         if (!blob) {
@@ -581,7 +587,7 @@ function render_image_widget($config)
                                         };
                                         reader.readAsDataURL(blob);
                                     },
-                                    blob.type,
+                                    imageType ? imageType : 'image/jpeg'
                                 );
                             };
                             img.onerror = () => {
@@ -692,7 +698,6 @@ function render_image_widget($config)
             }
 
             function deleteFromServer(imgURL) {
-                console.log('DELETING: ', imgURL)
                 fetch('delete_image.php', {
                     method: 'POST',
                     headers: {

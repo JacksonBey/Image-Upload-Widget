@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = 12345;
 
     foreach ($images as $index => $imageData) {
-        $extension = 'jpg';  // Default to JPEG
+        // $extension = 'jpg';  // Default to JPEG
         if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $matches)) {
             $extension = $matches[1];
         }
